@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Withdrawal - Glo Coin Platform</title>
+    
+    <!-- Bootstrap 5 CSS - Local Copy -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome - Local Copy -->
+    <link rel="stylesheet" href="css/fontawesome.min.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+        .debug-panel {
+            background: #fff;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐛 Debug Withdrawal Form</h1>
+        
+        <div class="debug-panel">
+            <h3>🔍 System Status</h3>
+            <div id="system-status" class="status info">Checking system...</div>
+            <button class="btn btn-primary" onclick="checkSystem()">Check System</button>
+        </div>
+
+        <div class="debug-panel">
+            <h3>🔑 Authentication</h3>
+            <div id="auth-status" class="status info">Checking authentication...</div>
+            <button class="btn btn-primary" onclick="checkAuth()">Check Auth</button>
+            <button class="btn btn-success" onclick="loginUser()">Login as Atul</button>
+        </div>
+
+        <div class="debug-panel">
+            <h3>📊 User Data</h3>
+            <div id="user-status" class="status info">No user data</div>
+            <button class="btn btn-primary" onclick="loadUserData()">Load User Data</button>
+        </div>
+
+        <div class="debug-panel">
+            <h3>💰 Simple Withdrawal Form</h3>
+            <div id="form-status" class="status info">Form not initialized</div>
+            
+            <form id="simple-withdrawal-form">
+                <div class="mb-3">
+                    <label for="amount" class="form-label">Glo Coins to Withdraw</label>
+                    <input type="number" class="form-control" id="amount" min="1" max="1000" required>
+                    <div class="form-text">Available: <span id="available-balance">0</span> GC</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="beneficiary" class="form-label">Beneficiary Name</label>
+                    <input type="text" class="form-control" id="beneficiary" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="account" class="form-label">Account Number</label>
+                    <input type="text" class="form-control" id="account" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="ifsc" class="form-label">IFSC Code</label>
+                    <input type="text" class="form-control" id="ifsc" required>
+                </div>
+                
+                <button type="submit" class="btn btn-warning">Process Withdrawal</button>
+            </form>
+        </div>
+
+        <div class="debug-panel">
+            <h3>🔗 Navigation</h3>
+            <button class="btn btn-primary" onclick="window.location.href='glocoin-enhanced.html'">Dashboard</button>
+            <button class="btn btn-primary" onclick="window.location.href='withdrawal.html'">Original Withdrawal</button>
+        </div>
+
+        <div class="debug-panel">
+            <h3>📝 Debug Log</h3>
+            <pre id="debug-log" style="background: #f8f9fa; padding: 10px; border-radius: 5px; max-height: 300px; overflow-y: auto;">Waiting for tests...</pre>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let authToken = null;
+        let currentUser = null;
+        let debugLog = [];
+
+        function log(message) {
+            debugLog.push(`[${new Date().toLocaleTimeString()}] ${message}`);
+            document.getElementById('debug-log').textContent = debugLog.join('\n');
+            console.log(message);
+        }
+
+        async function checkSystem() {
+            const statusDiv = document.getElementById('system-status');
+            log('🔍 Checking system status...');
+            
+            try {
+                // Check if server is responding
+                const response = await fetch('/api/glocoin/test', {
+                    method: 'GET'
+                });
+                
+                if (response.status === 404) {
+                    statusDiv.className = 'status info';
+                    statusDiv.innerHTML = '✅ Server responding (404 expected for /test)';
+                    log('✅ Server is responding correctly');
+                } else {
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = '✅ Server responding';
+                    log('✅ Server is responding');
+                }
+                
+                // Check if CSS and JS are loading
+                const bootstrapLoaded = typeof bootstrap !== 'undefined';
+                log(`Bootstrap loaded: ${bootstrapLoaded}`);
+                
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `❌ System error: ${error.message}`;
+                log(`❌ System error: ${error.message}`);
+            }
+        }
+
+        async function checkAuth() {
+            const statusDiv = document.getElementById('auth-status');
+            log('🔑 Checking authentication...');
+            
+            const token = localStorage.getItem('glocoinToken');
+            if (!token) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ No token found';
+                log('❌ No authentication token found');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/glocoin/wallet', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    authToken = token;
+                    currentUser = data.user;
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = `✅ Authenticated: ${data.user.username}`;
+                    log(`✅ Authenticated as: ${data.user.username}`);
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = `❌ Auth failed: ${data.error}`;
+                    log(`❌ Authentication failed: ${data.error}`);
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `❌ Auth error: ${error.message}`;
+                log(`❌ Authentication error: ${error.message}`);
+            }
+        }
+
+        async function loginUser() {
+            log('🔑 Attempting to login...');
+            
+            try {
+                const response = await fetch('/api/glocoin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'atul',
+                        password: 'password123'
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    localStorage.setItem('glocoinToken', data.token);
+                    log('✅ Login successful, token saved');
+                    await checkAuth();
+                } else {
+                    log(`❌ Login failed: ${data.error}`);
+                }
+            } catch (error) {
+                log(`❌ Login error: ${error.message}`);
+            }
+        }
+
+        async function loadUserData() {
+            const statusDiv = document.getElementById('user-status');
+            log('📊 Loading user data...');
+            
+            if (!authToken) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ Please authenticate first';
+                log('❌ No authentication token for user data');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/glocoin/wallet', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    currentUser = data.user;
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = `✅ User: ${data.user.username}, Balance: ${data.user.glo_balance} GC`;
+                    document.getElementById('available-balance').textContent = data.user.glo_balance;
+                    log(`✅ User data loaded: ${data.user.username}, ${data.user.glo_balance} GC`);
+                    
+                    // Update form status
+                    document.getElementById('form-status').className = 'status success';
+                    document.getElementById('form-status').innerHTML = '✅ Form ready for use';
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = `❌ Data error: ${data.error}`;
+                    log(`❌ User data error: ${data.error}`);
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `❌ Load error: ${error.message}`;
+                log(`❌ User data load error: ${error.message}`);
+            }
+        }
+
+        // Form submission
+        document.getElementById('simple-withdrawal-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            log('💰 Processing withdrawal...');
+            
+            if (!authToken) {
+                alert('Please authenticate first');
+                log('❌ No authentication for withdrawal');
+                return;
+            }
+
+            const formData = {
+                glo_amount: parseFloat(document.getElementById('amount').value),
+                withdrawal_method: 'bank_transfer',
+                beneficiary_name: document.getElementById('beneficiary').value,
+                bank_account_number: document.getElementById('account').value,
+                ifsc_code: document.getElementById('ifsc').value.toUpperCase()
+            };
+
+            log(`💰 Withdrawal data: ${JSON.stringify(formData)}`);
+
+            try {
+                const response = await fetch('/api/glocoin/withdraw', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    log(`✅ Withdrawal successful: ${data.withdrawal.request_id}`);
+                    alert(`✅ Withdrawal successful! Request ID: ${data.withdrawal.request_id}`);
+                } else {
+                    log(`❌ Withdrawal failed: ${data.error}`);
+                    alert(`❌ Withdrawal failed: ${data.error}`);
+                }
+            } catch (error) {
+                log(`❌ Withdrawal error: ${error.message}`);
+                alert(`❌ Withdrawal error: ${error.message}`);
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Debug page loaded');
+            checkSystem();
+            checkAuth();
+        });
+    </script>
+</body>
+</html>
