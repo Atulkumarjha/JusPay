@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap Test</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/fontawesome.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-primary">Bootstrap Test Page</h1>
+        <p class="lead">This page tests if Bootstrap is working correctly.</p>
+        
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#testModal">
+            <i class="fas fa-test"></i> Test Modal
+        </button>
+        
+        <div class="alert alert-success mt-3" role="alert">
+            <i class="fas fa-check-circle"></i> If you can see this styled alert, Bootstrap CSS is working!
+        </div>
+    </div>
+
+    <!-- Test Modal -->
+    <div class="modal fade" id="testModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bootstrap Test Modal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>If this modal opens, Bootstrap JavaScript is working correctly!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Bootstrap test page loaded');
+            if (typeof bootstrap !== 'undefined') {
+                console.log('✅ Bootstrap JS is available');
+                console.log('Bootstrap object:', bootstrap);
+            } else {
+                console.error('❌ Bootstrap JS is NOT available');
+            }
+        });
+    </script>
+</body>
+</html>

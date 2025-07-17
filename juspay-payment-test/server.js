@@ -45,7 +45,12 @@ app.get('/', (req, res) => {
 
 // Glo Coin dashboard page
 app.get('/glocoin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'glocoin.html'));
+    res.sendFile(path.join(__dirname, 'public', 'glocoin-enhanced.html'));
+});
+
+// Enhanced Glo Coin dashboard (new version)
+app.get('/glocoin-enhanced', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'glocoin-enhanced.html'));
 });
 
 // Health check endpoint

@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glo Coin - Digital Currency Platform</title>
+    
+    <!-- Bootstrap 5 CSS - Local Copy -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome - Local Copy -->
+    <link rel="stylesheet" href="css/fontawesome.min.css">
+    
+    <!-- Bootstrap Loading Check -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ Loading local Bootstrap CSS and Font Awesome');
+        });
+    </script>
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: var(--card-shadow);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .glo-coin-logo {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            border-radius: 50%;
+            margin-right: 10px;
+            position: relative;
+        }
+
+        .glo-coin-logo::before {
+            content: "G";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: var(--card-shadow);
+            border-radius: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            border: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+            border: none;
+            border-radius: 10px;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color), #e67e22);
+            border: none;
+            border-radius: 10px;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), #c0392b);
+            border: none;
+            border-radius: 10px;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .balance-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .balance-currency {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .transaction-item {
+            border-left: 4px solid var(--secondary-color);
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 0 10px 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        .transaction-item:hover {
+            background: #f8f9fa;
+            border-left-color: var(--success-color);
+        }
+
+        .transaction-credit {
+            border-left-color: var(--success-color);
+        }
+
+        .transaction-debit {
+            border-left-color: var(--danger-color);
+        }
+
+        .transaction-withdrawal {
+            border-left-color: var(--warning-color);
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+
+        .loading-spinner {
+            display: none;
+        }
+
+        .loading .loading-spinner {
+            display: inline-block;
+        }
+
+        .bank-account-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .bank-account-number {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        .stats-card {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .balance-amount {
+                font-size: 2rem;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Fallback Modal Styles */
+        .modal.show {
+            display: block !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1050;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+
+        .modal-dialog {
+            position: relative;
+            margin: 1rem auto;
+            max-width: 90%;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .modal-dialog.modal-lg {
+            max-width: 95%;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            pointer-events: auto;
+            margin: 2rem 0;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            transition: transform 0.1s ease;
+        }
+
+        /* Enhanced Modal Styles */
+        .modal-header {
+            border-bottom: 2px solid #dee2e6;
+            padding: 1rem;
+        }
+
+        .modal-footer {
+            border-top: 2px solid #dee2e6;
+            padding: 1rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .loading-spinner {
+            display: none;
+        }
+
+        .loading .loading-spinner {
+            display: inline-block;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        #inr-amount-display {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* Responsive Design for Mobile */
+        @media (max-width: 768px) {
+            .modal-dialog {
+                margin: 0.5rem;
+                max-width: 95%;
+            }
+            
+            .modal-dialog.modal-lg {
+                max-width: 98%;
+            }
+            
+            .modal-content {
+                margin: 1rem 0;
+            }
+            
+            .modal-header,
+            .modal-footer {
+                padding: 0.75rem;
+            }
+            
+            .modal-body {
+                padding: 1rem;
+                max-height: 60vh;
+            }
+            
+            .modal-title {
+                font-size: 1.1rem;
+            }
+            
+            .btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .form-control {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 0.75rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .form-label {
+                font-size: 0.9rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+            }
+            
+            .alert {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            /* Force responsive behavior for all rows and columns */
+            .row {
+                margin-left: -0.5rem;
+                margin-right: -0.5rem;
+            }
+            
+            .col-12,
+            .col-md-6 {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            /* Ensure form elements stack properly */
+            .withdrawal-form .row .col-md-6,
+            .withdrawal-form .row .col-12 {
+                width: 100% !important;
+                flex: 0 0 100% !important;
+                max-width: 100% !important;
+            }
+            
+            /* Make input display responsive */
+            #inr-amount-display {
+                font-size: 0.9rem;
+                padding: 0.75rem;
+                word-break: break-word;
+            }
+            
+            /* Responsive button layout */
+            .modal-footer {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .modal-footer .btn {
+                width: 100%;
+                margin-bottom: 0;
+            }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 576px) {
+            .modal-dialog {
+                margin: 0.25rem;
+                max-width: 98%;
+            }
+            
+            .modal-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                padding: 0.5rem;
+            }
+            
+            .btn-close {
+                position: absolute;
+                top: 0.5rem;
+                right: 0.5rem;
+            }
+            
+            .modal-body {
+                padding: 0.75rem;
+                max-height: 55vh;
+            }
+            
+            .modal-footer {
+                padding: 0.5rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .modal-footer .btn {
+                width: 100%;
+                padding: 0.75rem;
+                font-size: 0.85rem;
+            }
+            
+            /* Force single column layout */
+            .withdrawal-form .row,
+            .modal-body .row {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .withdrawal-form .col-md-6,
+            .withdrawal-form .col-12,
+            .modal-body .col-md-6,
+            .modal-body .col-12 {
+                width: 100% !important;
+                max-width: 100% !important;
+                flex: none !important;
+                margin-bottom: 0.75rem;
+            }
+            
+            /* Smaller form elements */
+            .form-control {
+                font-size: 14px;
+                padding: 0.5rem;
+            }
+            
+            .form-label {
+                font-size: 0.8rem;
+                margin-bottom: 0.25rem;
+            }
+            
+            .form-text {
+                font-size: 0.7rem;
+            }
+            
+            .alert {
+                padding: 0.5rem;
+                font-size: 0.8rem;
+            }
+            
+            .alert ul {
+                padding-left: 1rem;
+                margin-bottom: 0;
+            }
+            
+            .alert li {
+                font-size: 0.75rem;
+                margin-bottom: 0.25rem;
+            }
+        }
+
+        /* Dashboard Responsive */
+        @media (max-width: 768px) {
+            .dashboard-section .row {
+                margin: 0;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+            
+            .balance-amount {
+                font-size: 1.5rem !important;
+            }
+            
+            .quick-actions .btn {
+                margin-bottom: 0.5rem;
+                width: 100%;
+            }
+            
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Enhanced form responsiveness */
+        .responsive-form {
+            width: 100%;
+        }
+
+        .responsive-row {
+            margin: 0 !important;
+        }
+
+        .responsive-form .row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .responsive-form .col-12,
+        .responsive-form .col-md-6 {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        @media (max-width: 767.98px) {
+            .responsive-form .col-md-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+            
+            .responsive-form .row {
+                flex-direction: column;
+            }
+            
+            .responsive-form .mb-3 {
+                margin-bottom: 1rem !important;
+            }
+        }
+
+        /* Specific withdrawal form styles */
+        #withdrawal-form {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        #withdrawal-form .form-control {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #withdrawal-form .row {
+            width: 100%;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        #withdrawal-form .col-12,
+        #withdrawal-form .col-md-6 {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        /* Mobile specific form adjustments */
+        @media (max-width: 767px) {
+            #withdrawal-form .row {
+                display: block;
+            }
+            
+            #withdrawal-form .col-md-6,
+            #withdrawal-form .col-12 {
+                width: 100% !important;
+                display: block;
+                padding-left: 0;
+                padding-right: 0;
+                margin-bottom: 1rem;
+            }
+            
+            #withdrawal-form .form-control,
+            #withdrawal-form .form-select {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <span class="glo-coin-logo"></span>
+                Glo Coin Platform
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="nav-username"></a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light btn-sm" id="logout-btn" style="display: none;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Welcome Section for New Users -->
+    <div class="welcome-section" id="welcome-section">
+        <div class="container">
+            <h1 class="display-4 mb-4">Welcome to Glo Coin</h1>
+            <p class="lead">Your Digital Currency Platform - 1 Glo Coin = ₹3 INR</p>
+            <div class="row mt-5">
+                <div class="col-md-4">
+                    <div class="feature-icon"><i class="fas fa-coins"></i></div>
+                    <h5>Earn Glo Coins</h5>
+                    <p>Receive Glo Coins and manage your digital wallet</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-icon"><i class="fas fa-exchange-alt"></i></div>
+                    <h5>Convert & Withdraw</h5>
+                    <p>Convert Glo Coins to INR and withdraw to your bank</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h5>Secure & Tracked</h5>
+                    <p>All transactions secured and tracked via JusPay</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <!-- Alert Container -->
+        <div id="alert-container"></div>
+
+        <!-- Login/Register Section -->
+        <div id="auth-section">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header text-center">
+                            <ul class="nav nav-pills nav-fill" id="auth-tabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="login-tab" data-bs-toggle="pill" data-bs-target="#login-panel" type="button" role="tab">
+                                        <i class="fas fa-sign-in-alt"></i> Login
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="register-tab" data-bs-toggle="pill" data-bs-target="#register-panel" type="button" role="tab">
+                                        <i class="fas fa-user-plus"></i> Register
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content" id="auth-tab-content">
+                                <!-- Login Form -->
+                                <div class="tab-pane fade show active" id="login-panel" role="tabpanel">
+                                    <form id="login-form">
+                                        <div class="mb-3">
+                                            <label for="login-username" class="form-label">
+                                                <i class="fas fa-user"></i> Username
+                                            </label>
+                                            <input type="text" class="form-control" id="login-username" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="login-password" class="form-label">
+                                                <i class="fas fa-lock"></i> Password
+                                            </label>
+                                            <input type="password" class="form-control" id="login-password" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <span class="loading-spinner spinner-border spinner-border-sm me-2"></span>
+                                            <i class="fas fa-sign-in-alt"></i> Login
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <!-- Register Form -->
+                                <div class="tab-pane fade" id="register-panel" role="tabpanel">
+                                    <form id="register-form">
+                                        <div class="mb-3">
+                                            <label for="register-username" class="form-label">
+                                                <i class="fas fa-user"></i> Username
+                                            </label>
+                                            <input type="text" class="form-control" id="register-username" required>
+                                            <div class="form-text">Choose a unique username</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="register-fullname" class="form-label">
+                                                <i class="fas fa-id-card"></i> Full Name
+                                            </label>
+                                            <input type="text" class="form-control" id="register-fullname" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="register-email" class="form-label">
+                                                <i class="fas fa-envelope"></i> Email
+                                            </label>
+                                            <input type="email" class="form-control" id="register-email" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="register-phone" class="form-label">
+                                                <i class="fas fa-phone"></i> Phone Number
+                                            </label>
+                                            <input type="tel" class="form-control" id="register-phone" placeholder="9876543210" required>
+                                            <div class="form-text">Enter 10-digit mobile number without country code</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="register-password" class="form-label">
+                                                <i class="fas fa-lock"></i> Password
+                                            </label>
+                                            <input type="password" class="form-control" id="register-password" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="register-confirm-password" class="form-label">
+                                                <i class="fas fa-lock"></i> Confirm Password
+                                            </label>
+                                            <input type="password" class="form-control" id="register-confirm-password" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-success w-100">
+                                            <span class="loading-spinner spinner-border spinner-border-sm me-2"></span>
+                                            <i class="fas fa-user-plus"></i> Create Account
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" style="display: none;">
+            <!-- User Stats Row -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card stats-card">
+                        <div class="stats-number" id="total-glo-coins">0</div>
+                        <div class="text-muted">Glo Coins</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stats-card">
+                        <div class="stats-number" id="total-inr-value">₹0</div>
+                        <div class="text-muted">INR Value</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stats-card">
+                        <div class="stats-number" id="total-transactions">0</div>
+                        <div class="text-muted">Transactions</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Dashboard Row -->
+            <div class="row">
+                <!-- Wallet Section -->
+                <div class="col-lg-8">
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-wallet"></i> My Wallet</h5>
+                            <button class="btn btn-outline-light btn-sm" id="refresh-wallet">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="balance-card">
+                                <p class="balance-amount" id="glo-balance">0</p>
+                                <p class="balance-currency">Glo Coins</p>
+                                <p class="mb-0">≈ ₹<span id="inr-equivalent">0</span> INR</p>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-6">
+                                    <button class="btn btn-warning w-100" id="withdraw-btn">
+                                        <i class="fas fa-money-bill-wave"></i> Withdraw
+                                    </button>
+                                </div>
+                                <div class="col-6">
+                                    <button class="btn btn-info w-100" id="create-bank-account-btn">
+                                        <i class="fas fa-university"></i> Add Bank Account
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bank Account Section -->
+                    <div class="card mb-4" id="bank-account-section" style="display: none;">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-university"></i> My Bank Account</h5>
+                        </div>
+                        <div class="card-body" id="bank-account-details">
+                            <!-- Bank account details will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Transaction History -->
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-history"></i> Transaction History</h5>
+                            <button class="btn btn-outline-light btn-sm" id="refresh-transactions">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="transaction-list">
+                                <div class="text-center text-muted p-4">
+                                    <i class="fas fa-history fa-3x mb-3"></i>
+                                    <p>No transactions yet</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Sidebar -->
+                <div class="col-lg-4 col-12">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2 quick-actions">
+                                <button class="btn btn-primary" id="view-profile-btn">
+                                    <i class="fas fa-user"></i> View Profile
+                                </button>
+                                <button class="btn btn-success" id="check-balance-btn">
+                                    <i class="fas fa-balance-scale"></i> Check Balance
+                                </button>
+                                <button class="btn btn-info" id="transaction-history-btn">
+                                    <i class="fas fa-list"></i> Transaction History
+                                </button>
+                                <button class="btn btn-warning" id="withdrawal-history-btn">
+                                    <i class="fas fa-money-bill-wave"></i> Withdrawal History
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Exchange Rate Info -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-exchange-alt"></i> Exchange Rate</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="display-6 text-primary">1 GC = ₹3</div>
+                            <p class="text-muted mb-0">Current exchange rate</p>
+                            <small class="text-success">
+                                <i class="fas fa-check-circle"></i> Fixed rate guaranteed
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdrawal Modal -->
+    <div class="modal fade" id="withdrawalModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-money-bill-wave"></i> Withdraw Glo Coins
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="withdrawal-form" class="withdrawal-form responsive-form">
+                        <div class="row g-3 responsive-row">>
+                            <div class="col-12 col-md-6">
+                                <div class="mb-3">
+                                    <label for="withdrawal-amount" class="form-label">
+                                        <i class="fas fa-coins"></i> Glo Coins to Withdraw
+                                    </label>
+                                    <input type="number" class="form-control" id="withdrawal-amount" min="1" max="1000" required placeholder="Enter amount">
+                                    <div class="form-text">Minimum: 1 GC, Maximum: 1000 GC</div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">INR Amount (after 2% fee)</label>
+                                    <div class="form-control bg-light" id="inr-amount-display">₹0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="beneficiary-name" class="form-label">
+                                <i class="fas fa-user"></i> Beneficiary Name
+                            </label>
+                            <input type="text" class="form-control" id="beneficiary-name" required placeholder="Enter beneficiary name">
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <div class="mb-3">
+                                    <label for="bank-account-number" class="form-label">
+                                        <i class="fas fa-university"></i> Bank Account Number
+                                    </label>
+                                    <input type="text" class="form-control" id="bank-account-number" required placeholder="Enter account number">
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="mb-3">
+                                    <label for="ifsc-code" class="form-label">
+                                        <i class="fas fa-code"></i> IFSC Code
+                                    </label>
+                                    <input type="text" class="form-control" id="ifsc-code" pattern="[A-Z]{4}[0-9]{7}" required placeholder="ABCD0123456">
+                                    <div class="form-text">Format: ABCD0123456</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Important:</strong> 
+                            <ul class="mb-0 mt-2">
+                                <li>Processing fee: 2% of withdrawal amount</li>
+                                <li>Funds will be credited to your bank account</li>
+                                <li>Transaction will be tracked via JusPay dashboard</li>
+                                <li>Processing time: Instant to 5 minutes</li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer d-flex flex-column flex-sm-row gap-2">
+                    <button type="button" class="btn btn-secondary flex-fill" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" form="withdrawal-form" class="btn btn-warning flex-fill">
+                        <span class="loading-spinner spinner-border spinner-border-sm me-2"></span>
+                        <i class="fas fa-paper-plane"></i> Process Withdrawal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div class="modal fade" id="profileModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user"></i> User Profile
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="profile-details">
+                    <!-- Profile details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary w-100" data-bs-dismiss="modal">
+                        <i class="fas fa-check"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS - Local Copy -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Bootstrap Verification -->
+    <script>
+        // Verify Bootstrap loaded correctly
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                if (typeof bootstrap !== 'undefined') {
+                    console.log('✅ Local Bootstrap JS loaded successfully');
+                    console.log('Bootstrap version:', bootstrap.Modal ? 'Modal available' : 'Modal not available');
+                } else {
+                    console.error('❌ Local Bootstrap JS failed to load');
+                }
+            }, 100);
+        });
+    </script>
+    
+    <!-- Custom JavaScript -->
+    <script src="glocoin-enhanced.js"></script>
+    
+    <!-- Debug Script -->
+    <script src="debug-withdrawal.js"></script>
+</body>
+</html>

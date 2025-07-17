@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw Glo Coins - Glo Coin Platform</title>
+    
+    <!-- Bootstrap 5 CSS - Local Copy -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome - Local Copy -->
+    <link rel="stylesheet" href="css/fontawesome.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: var(--card-shadow);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+
+        .card {
+            border: none;
+            box-shadow: var(--card-shadow);
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--warning-color), #e67e22);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: bold;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: border-color 0.3s ease;
+            padding: 0.75rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .btn {
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            border: none;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color), #e67e22);
+            border: none;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            border: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .withdrawal-header {
+            background: linear-gradient(135deg, var(--warning-color), #e67e22);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .amount-display {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .fee-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="glocoin-enhanced.html">
+                <span class="glo-coin-logo"></span>
+                Glo Coin
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link text-white" href="glocoin-enhanced.html">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Withdrawal Header -->
+    <div class="withdrawal-header">
+        <div class="container text-center">
+            <h1><i class="fas fa-money-bill-wave"></i> Withdraw Glo Coins</h1>
+            <p class="lead mb-0">Convert your Glo Coins to INR and transfer to your bank account</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Current Balance Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-wallet"></i> Current Balance</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="balance-card">
+                                    <h3 id="current-balance">0 GC</h3>
+                                    <p class="mb-0">Available Balance</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="fee-info">
+                                    <h5><i class="fas fa-exchange-alt"></i> Exchange Rate</h5>
+                                    <p class="mb-2"><strong>1 GC = ₹3 INR</strong></p>
+                                    <p class="mb-0"><small>Processing Fee: 2%</small></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Withdrawal Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-paper-plane"></i> Withdrawal Request</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="withdrawal-form">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="withdrawal-amount" class="form-label">
+                                            <i class="fas fa-coins"></i> Glo Coins to Withdraw
+                                        </label>
+                                        <input type="number" class="form-control" id="withdrawal-amount" 
+                                               min="1" max="1000" required placeholder="Enter amount">
+                                        <div class="form-text">Minimum: 1 GC, Maximum: 1000 GC</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Net Amount (after fee)</label>
+                                        <div class="amount-display" id="inr-amount-display">₹0</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="beneficiary-name" class="form-label">
+                                    <i class="fas fa-user"></i> Beneficiary Name
+                                </label>
+                                <input type="text" class="form-control" id="beneficiary-name" 
+                                       required placeholder="Enter beneficiary name">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="bank-account-number" class="form-label">
+                                            <i class="fas fa-university"></i> Bank Account Number
+                                        </label>
+                                        <input type="text" class="form-control" id="bank-account-number" 
+                                               required placeholder="Enter account number">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="ifsc-code" class="form-label">
+                                            <i class="fas fa-code"></i> IFSC Code
+                                        </label>
+                                        <input type="text" class="form-control" id="ifsc-code" 
+                                               pattern="[A-Z]{4}[0-9]{7}" required placeholder="ABCD0123456">
+                                        <div class="form-text">Format: ABCD0123456</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle"></i> Important Information</h6>
+                                <ul class="mb-0">
+                                    <li>Processing fee: 2% of withdrawal amount</li>
+                                    <li>Funds will be credited to your bank account instantly</li>
+                                    <li>Transaction will be tracked via JusPay dashboard</li>
+                                    <li>Minimum withdrawal: 1 GC, Maximum: 1000 GC</li>
+                                </ul>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="glocoin-enhanced.html" class="btn btn-secondary me-md-2">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-warning">
+                                    <span class="loading-spinner spinner-border spinner-border-sm me-2" style="display: none;"></span>
+                                    <i class="fas fa-paper-plane"></i> Process Withdrawal
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="alert-container" style="position: fixed; top: 80px; right: 20px; z-index: 1000;"></div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Withdrawal Page Script -->
+    <script>
+        class WithdrawalPage {
+            constructor() {
+                this.authToken = localStorage.getItem('glocoinToken');
+                this.currentUser = null;
+                this.userBankAccount = null;
+                this.apiBase = '/api/glocoin';
+                this.bankApiBase = '/api/bank';
+                
+                this.init();
+            }
+
+            init() {
+                if (!this.authToken) {
+                    this.showError('Please log in first');
+                    setTimeout(() => {
+                        window.location.href = 'glocoin-enhanced.html';
+                    }, 2000);
+                    return;
+                }
+
+                this.bindEvents();
+                this.loadUserData();
+            }
+
+            bindEvents() {
+                document.getElementById('withdrawal-form').addEventListener('submit', (e) => this.handleWithdrawal(e));
+                document.getElementById('withdrawal-amount').addEventListener('input', (e) => this.calculateAmount(e));
+            }
+
+            async loadUserData() {
+                try {
+                    const response = await this.apiCall('GET', `${this.apiBase}/wallet`);
+                    if (response.success) {
+                        this.currentUser = response.user;
+                        this.updateBalance();
+                        this.loadBankAccount();
+                    }
+                } catch (error) {
+                    console.error('Error loading user data:', error);
+                    this.showError('Failed to load user data');
+                }
+            }
+
+            updateBalance() {
+                if (this.currentUser) {
+                    document.getElementById('current-balance').textContent = 
+                        `${this.currentUser.glo_balance || 0} GC`;
+                    
+                    const withdrawalInput = document.getElementById('withdrawal-amount');
+                    withdrawalInput.max = this.currentUser.glo_balance || 0;
+                    withdrawalInput.placeholder = `Max: ${this.currentUser.glo_balance || 0} GC`;
+                }
+            }
+
+            async loadBankAccount() {
+                try {
+                    const response = await this.apiCall('GET', `${this.bankApiBase}/accounts/all`);
+                    if (response.success && response.accounts.length > 0) {
+                        this.userBankAccount = response.accounts[0];
+                        this.prefillBankDetails();
+                    }
+                } catch (error) {
+                    console.log('No bank account found');
+                }
+            }
+
+            prefillBankDetails() {
+                if (this.userBankAccount) {
+                    document.getElementById('beneficiary-name').value = this.userBankAccount.account_holder_name || '';
+                    document.getElementById('bank-account-number').value = this.userBankAccount.account_number || '';
+                    document.getElementById('ifsc-code').value = this.userBankAccount.ifsc_code || '';
+                }
+            }
+
+            calculateAmount(e) {
+                const amount = parseFloat(e.target.value) || 0;
+                const display = document.getElementById('inr-amount-display');
+                
+                if (amount <= 0) {
+                    display.textContent = '₹0';
+                    display.className = 'amount-display';
+                    return;
+                }
+                
+                const inrAmount = amount * 3;
+                const fee = inrAmount * 0.02;
+                const netAmount = inrAmount - fee;
+                
+                if (this.currentUser && amount > this.currentUser.glo_balance) {
+                    display.textContent = `₹${netAmount.toFixed(2)} - INSUFFICIENT BALANCE`;
+                    display.className = 'amount-display text-danger';
+                } else {
+                    display.textContent = `₹${netAmount.toFixed(2)} (Fee: ₹${fee.toFixed(2)})`;
+                    display.className = 'amount-display text-success';
+                }
+            }
+
+            async handleWithdrawal(e) {
+                e.preventDefault();
+                
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const spinner = submitBtn.querySelector('.loading-spinner');
+                
+                spinner.style.display = 'inline-block';
+                submitBtn.disabled = true;
+                
+                try {
+                    const formData = {
+                        glo_amount: parseFloat(document.getElementById('withdrawal-amount').value),
+                        withdrawal_method: 'bank_transfer',
+                        beneficiary_name: document.getElementById('beneficiary-name').value.trim(),
+                        bank_account_number: document.getElementById('bank-account-number').value.trim(),
+                        ifsc_code: document.getElementById('ifsc-code').value.trim().toUpperCase()
+                    };
+
+                    // Validation
+                    if (!formData.glo_amount || formData.glo_amount <= 0) {
+                        throw new Error('Please enter a valid withdrawal amount');
+                    }
+
+                    if (formData.glo_amount > this.currentUser.glo_balance) {
+                        throw new Error(`Insufficient balance. Available: ${this.currentUser.glo_balance} GC`);
+                    }
+
+                    if (!formData.beneficiary_name || !formData.bank_account_number || !formData.ifsc_code) {
+                        throw new Error('Please fill in all bank details');
+                    }
+
+                    if (!/^[A-Z]{4}[0-9]{7}$/.test(formData.ifsc_code)) {
+                        throw new Error('Invalid IFSC code format');
+                    }
+
+                    const response = await this.apiCall('POST', `${this.apiBase}/withdraw`, formData);
+                    
+                    if (response.success) {
+                        this.showSuccess(`
+                            Withdrawal successful! 
+                            Request ID: ${response.withdrawal.request_id}
+                            Net amount: ₹${response.withdrawal.net_amount}
+                            ${response.processing?.withdrawal?.juspay_order_id ? 
+                              `JusPay Order: ${response.processing.withdrawal.juspay_order_id}` : ''}
+                        `);
+                        
+                        setTimeout(() => {
+                            window.location.href = 'glocoin-enhanced.html';
+                        }, 3000);
+                    } else {
+                        throw new Error(response.error || 'Withdrawal failed');
+                    }
+                } catch (error) {
+                    this.showError(`Withdrawal failed: ${error.message}`);
+                } finally {
+                    spinner.style.display = 'none';
+                    submitBtn.disabled = false;
+                }
+            }
+
+            async apiCall(method, url, data = null) {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.authToken}`
+                    }
+                };
+
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(url, options);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return await response.json();
+            }
+
+            showAlert(message, type) {
+                const alertContainer = document.getElementById('alert-container');
+                const alert = document.createElement('div');
+                alert.className = `alert alert-${type} alert-dismissible fade show`;
+                alert.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                alertContainer.appendChild(alert);
+                
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.remove();
+                    }
+                }, 5000);
+            }
+
+            showSuccess(message) {
+                this.showAlert(message, 'success');
+            }
+
+            showError(message) {
+                this.showAlert(message, 'danger');
+            }
+        }
+
+        // Initialize withdrawal page
+        document.addEventListener('DOMContentLoaded', () => {
+            new WithdrawalPage();
+        });
+    </script>
+</body>
+</html>
