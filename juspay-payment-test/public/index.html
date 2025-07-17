@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JusPay Payment Gateway Test</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 JusPay Payment Gateway</h1>
+            <p>Test Environment</p>
+        </header>
+
+        <div class="payment-form-container">
+            <h2>Payment Details</h2>
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label for="amount">Amount (₹)</label>
+                    <input type="number" id="amount" name="amount" required min="1" step="0.01" placeholder="100.00">
+                </div>
+
+                <div class="form-group">
+                    <label for="currency">Currency</label>
+                    <select id="currency" name="currency" required>
+                        <option value="INR">INR - Indian Rupee</option>
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="customer_email">Customer Email</label>
+                    <input type="email" id="customer_email" name="customer_email" placeholder="customer@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="customer_phone">Customer Phone</label>
+                    <input type="tel" id="customer_phone" name="customer_phone" placeholder="+91 9876543210">
+                </div>
+
+                <div class="form-group">
+                    <label for="payment_type">Payment Type</label>
+                    <select id="payment_type" name="payment_type">
+                        <option value="order">Express Checkout Order</option>
+                        <option value="session">Express Checkout Session</option>
+                        <option value="link">Payment Link</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="product_id">Product ID (Optional)</label>
+                    <input type="text" id="product_id" name="product_id" placeholder="default_product">
+                </div>
+
+                <button type="submit" id="payBtn" class="pay-button">
+                    � Create Express Checkout
+                </button>
+            </form>
+        </div>
+
+        <div class="response-container">
+            <h3>API Response</h3>
+            <div id="responseArea" class="response-area">
+                <p class="placeholder">Payment response will appear here...</p>
+            </div>
+        </div>
+
+        <div class="test-cards">
+            <h3>🧪 Test Card Numbers</h3>
+            <div class="card-list">
+                <div class="card-item">
+                    <strong>Visa:</strong> 4111 1111 1111 1111
+                </div>
+                <div class="card-item">
+                    <strong>Mastercard:</strong> 5555 5555 5555 4444
+                </div>
+                <div class="card-item">
+                    <strong>Amex:</strong> 3782 8224 6310 005
+                </div>
+                <div class="card-item">
+                    <strong>CVV:</strong> Any 3-4 digit number
+                </div>
+                <div class="card-item">
+                    <strong>Expiry:</strong> Any future date
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="checkStatusBtn" class="secondary-button" disabled>
+                📊 Check Payment Status
+            </button>
+            <button id="getMethodsBtn" class="secondary-button">
+                💡 Get Payment Methods
+            </button>
+            <button id="healthCheckBtn" class="secondary-button">
+                🔍 Health Check
+            </button>
+            <button id="clearBtn" class="secondary-button">
+                🗑️ Clear Response
+            </button>
+        </div>
+
+        <div class="api-endpoints">
+            <h3>🔗 Available API Endpoints</h3>
+            <div class="endpoint-list">
+                <div class="endpoint-item">
+                    <strong>POST</strong> /api/payment/create - Create Express Checkout order
+                </div>
+                <div class="endpoint-item">
+                    <strong>POST</strong> /api/payment/session - Create Express Checkout session
+                </div>
+                <div class="endpoint-item">
+                    <strong>POST</strong> /api/payment/process - Process Express Checkout payment
+                </div>
+                <div class="endpoint-item">
+                    <strong>POST</strong> /api/payment/link - Create payment link
+                </div>
+                <div class="endpoint-item">
+                    <strong>GET</strong> /api/payment/order/:order_id - Get order status
+                </div>
+                <div class="endpoint-item">
+                    <strong>GET</strong> /api/payment/session/:session_id - Get session status
+                </div>
+                <div class="endpoint-item">
+                    <strong>GET</strong> /api/payment/methods - Get payment methods
+                </div>
+                <div class="endpoint-item">
+                    <strong>GET</strong> /api/payment/customer/:id/methods - Get customer methods
+                </div>
+                <div class="endpoint-item">
+                    <strong>POST</strong> /api/payment/refund - Process refund
+                </div>
+                <div class="endpoint-item">
+                    <strong>POST</strong> /api/payment/capture - Capture pre-auth payment
+                </div>
+                <div class="endpoint-item">
+                    <strong>POST</strong> /api/payment/void - Void pre-auth payment
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
