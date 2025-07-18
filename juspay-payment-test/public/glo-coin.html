@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JusPay - Glo Coin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .welcome-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .welcome-card h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+        }
+
+        .welcome-card p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+
+        .glo-coin-logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .coming-soon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            display: inline-block;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+
+        .placeholder-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .placeholder-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border: 2px dashed #e0e0e0;
+        }
+
+        .placeholder-card h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .placeholder-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .success {
+            color: #28a745;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>JusPay - Glo Coin</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/glo-coin" class="active">Glo Coin</a>
+                <a href="/dashboard">Dashboard</a>
+            </div>
+            <div class="user-info">
+                <span id="userWelcome">Welcome, User!</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="welcome-card">
+            <div class="glo-coin-logo">🪙</div>
+            <h2>Glo Coin</h2>
+            <p>
+                Welcome to the Glo Coin section! This area is currently under development 
+                and will be populated with exciting features soon.
+            </p>
+            <div class="coming-soon">Coming Soon!</div>
+            <div class="success" id="successMessage"></div>
+            <div class="error" id="errorMessage"></div>
+        </div>
+
+        <div class="placeholder-content">
+            <div class="placeholder-card">
+                <div class="placeholder-icon">💰</div>
+                <h3>Coin Management</h3>
+                <p>Manage your Glo Coin balance and transactions. Features to be implemented soon.</p>
+            </div>
+
+            <div class="placeholder-card">
+                <div class="placeholder-icon">📊</div>
+                <h3>Analytics</h3>
+                <p>View detailed analytics and reports for your Glo Coin activities.</p>
+            </div>
+
+            <div class="placeholder-card">
+                <div class="placeholder-icon">🔄</div>
+                <h3>Transactions</h3>
+                <p>Send, receive, and track all your Glo Coin transactions in one place.</p>
+            </div>
+
+            <div class="placeholder-card">
+                <div class="placeholder-icon">⚙️</div>
+                <h3>Settings</h3>
+                <p>Configure your Glo Coin preferences and account settings.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load user info when page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/user');
+                if (response.ok) {
+                    const user = await response.json();
+                    document.getElementById('userWelcome').textContent = `Welcome, ${user.username}!`;
+                } else {
+                    // User not authenticated, redirect to login
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+                window.location.href = '/login';
+            }
+        });
+
+        async function logout() {
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Reset messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            try {
+                const response = await fetch('/logout', {
+                    method: 'POST',
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    successMessage.textContent = data.message;
+                    successMessage.style.display = 'block';
+                    
+                    // Redirect to login after successful logout
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1000);
+                } else {
+                    errorMessage.textContent = data.error || 'Logout failed';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                errorMessage.textContent = 'An error occurred during logout';
+                errorMessage.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

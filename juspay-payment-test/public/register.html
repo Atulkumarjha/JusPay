@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JusPay - Register</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .register-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .success {
+            color: #28a745;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .password-requirements {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="logo">
+            <h1>JusPay</h1>
+            <p>Create Your Account</p>
+        </div>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email (optional)</label>
+                <input type="email" id="email" name="email">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+                <div class="password-requirements">
+                    Password must be at least 6 characters long
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+            </div>
+
+            <button type="submit" class="btn" id="registerBtn">Register</button>
+            
+            <div class="error" id="errorMessage"></div>
+            <div class="success" id="successMessage"></div>
+        </form>
+
+        <div class="links">
+            <p>Already have an account? <a href="/login">Login here</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const registerBtn = document.getElementById('registerBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Reset messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // Get form data
+            const formData = new FormData(e.target);
+            const username = formData.get('username');
+            const email = formData.get('email');
+            const password = formData.get('password');
+            const confirmPassword = formData.get('confirmPassword');
+            
+            // Client-side validation
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'Passwords do not match';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            if (password.length < 6) {
+                errorMessage.textContent = 'Password must be at least 6 characters long';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Disable button
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Registering...';
+            
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, email, password, confirmPassword }),
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    successMessage.textContent = data.message + ' You can now login.';
+                    successMessage.style.display = 'block';
+                    
+                    // Reset form
+                    e.target.reset();
+                    
+                    // Redirect to login after successful registration
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                } else {
+                    errorMessage.textContent = data.error;
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.style.display = 'block';
+            } finally {
+                // Re-enable button
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Register';
+            }
+        });
+    </script>
+</body>
+</html>

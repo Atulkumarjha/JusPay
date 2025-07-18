@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JusPay - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .demo-info {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .demo-info h3 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .demo-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .success {
+            color: #28a745;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>JusPay</h1>
+            <p>Payment Test Environment</p>
+        </div>
+
+        <div class="demo-info">
+            <h3>Demo Credentials</h3>
+            <p><strong>Username:</strong> demouser</p>
+            <p><strong>Password:</strong> password</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn" id="loginBtn">Login</button>
+            
+            <div class="error" id="errorMessage"></div>
+            <div class="success" id="successMessage"></div>
+        </form>
+
+        <div class="links">
+            <p>Don't have an account? <a href="/register">Register here</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Reset messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // Get form data
+            const formData = new FormData(e.target);
+            const username = formData.get('username');
+            const password = formData.get('password');
+            
+            // Disable button
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    successMessage.textContent = data.message;
+                    successMessage.style.display = 'block';
+                    
+                    // Redirect to the specified route after successful login
+                    setTimeout(() => {
+                        window.location.href = data.redirectTo || '/glo-coin';
+                    }, 1000);
+                } else {
+                    errorMessage.textContent = data.error;
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.style.display = 'block';
+            } finally {
+                // Re-enable button
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
+        });
+    </script>
+</body>
+</html>
