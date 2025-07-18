@@ -94,6 +94,299 @@
             text-align: center;
         }
 
+        .balance-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .balance-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .balance-card.secondary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .balance-card h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .balance-card .amount {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .bank-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .bank-info {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .bank-info h4 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .bank-info p {
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .wallet-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .action-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        .action-card h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h3 {
+            color: #333;
+        }
+
+        .close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        /* JusPay Payment Modal Styles */
+        .payment-info, .payment-simulation {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .payment-simulation {
+            border-bottom: none;
+            background-color: #f8f9fa;
+        }
+
+        .payment-info h4, .payment-simulation h4 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .payment-info p {
+            margin: 0.5rem 0;
+            color: #666;
+        }
+
+        .payment-info strong {
+            color: #333;
+        }
+
+        .payment-simulation p {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .payment-simulation button {
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-pending {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .status-success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .status-failed {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .status-completed {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: white;
+        }
+
+        .transaction-history {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .transaction-item {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-details h4 {
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+
+        .transaction-details p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .transaction-amount {
+            font-weight: bold;
+            color: #dc3545;
+        }
+
         .welcome-card h2 {
             color: #333;
             margin-bottom: 1rem;
@@ -113,48 +406,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-        }
-
-        .coming-soon {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 25px;
-            display: inline-block;
-            margin-top: 1rem;
-            font-weight: bold;
-        }
-
-        .placeholder-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .placeholder-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            border: 2px dashed #e0e0e0;
-        }
-
-        .placeholder-card h3 {
-            color: #333;
-            margin-bottom: 1rem;
-        }
-
-        .placeholder-card p {
-            color: #666;
-            line-height: 1.6;
-        }
-
-        .placeholder-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
         }
 
         .error {
@@ -207,51 +458,203 @@
     <div class="container">
         <div class="welcome-card">
             <div class="glo-coin-logo">🪙</div>
-            <h2>Glo Coin</h2>
+            <h2>Glo Coin Wallet</h2>
             <p>
-                Welcome to the Glo Coin section! This area is currently under development 
-                and will be populated with exciting features soon.
+                Manage your wallet balance and convert between money and Glo Coins seamlessly.
             </p>
-            <div class="coming-soon">Coming Soon!</div>
             <div class="success" id="successMessage"></div>
             <div class="error" id="errorMessage"></div>
         </div>
 
-        <div class="placeholder-content">
-            <div class="placeholder-card">
-                <div class="placeholder-icon">💰</div>
-                <h3>Coin Management</h3>
-                <p>Manage your Glo Coin balance and transactions. Features to be implemented soon.</p>
+        <div class="balance-section">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #333;">Your Balances</h2>
+            <div class="balance-cards">
+                <div class="balance-card">
+                    <h3>💰 Wallet Balance</h3>
+                    <div class="amount" id="walletBalance">$0.00</div>
+                    <p>Available Money</p>
+                </div>
+                <div class="balance-card">
+                    <h3>🪙 Glo Coin Balance</h3>
+                    <div class="amount" id="gloBalance">0.00</div>
+                    <p>Glo Coins</p>
+                </div>
+                <div class="balance-card secondary">
+                    <h3>📊 Total Withdrawn</h3>
+                    <div class="amount" id="totalWithdrawn">$0.00</div>
+                    <p>All Time</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bank-section">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #333;">Bank Account Information</h2>
+            <div class="bank-info" id="bankInfo" style="display: none;">
+                <h4>Current Bank Account</h4>
+                <p><strong>Bank Name:</strong> <span id="bankName">-</span></p>
+                <p><strong>Account Holder:</strong> <span id="accountHolder">-</span></p>
+                <p><strong>Account Number:</strong> <span id="accountNumber">-</span></p>
+                <p><strong>Routing Number:</strong> <span id="routingNumber">-</span></p>
+            </div>
+            
+            <form id="bankForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bankNameInput">Bank Name</label>
+                        <input type="text" id="bankNameInput" name="bank_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="accountHolderInput">Account Holder Name</label>
+                        <input type="text" id="accountHolderInput" name="account_holder_name" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="accountNumberInput">Account Number</label>
+                        <input type="text" id="accountNumberInput" name="bank_account_number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="routingNumberInput">Routing Number</label>
+                        <input type="text" id="routingNumberInput" name="bank_routing_number" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-info" id="bankBtn">Save Bank Details</button>
+            </form>
+        </div>
+
+        <div class="wallet-actions">
+            <!-- JusPay Payment Integration -->
+            <div class="action-card" style="border: 2px solid #667eea;">
+                <h3>💳 Add Money via JusPay</h3>
+                <p style="color: #666; margin-bottom: 1rem;">Add funds to your wallet using JusPay sandbox payment gateway</p>
+                <form id="juspayPaymentForm">
+                    <div class="form-group">
+                        <label for="juspayAmount">Amount (₹)</label>
+                        <input type="number" id="juspayAmount" name="amount" min="1" step="0.01" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="juspayBtn">Pay with JusPay</button>
+                </form>
+                <div style="margin-top: 1rem;">
+                    <button type="button" class="btn btn-info" id="viewOrdersBtn">View Order History</button>
+                </div>
             </div>
 
-            <div class="placeholder-card">
-                <div class="placeholder-icon">📊</div>
-                <h3>Analytics</h3>
-                <p>View detailed analytics and reports for your Glo Coin activities.</p>
+            <!-- Add Money to Wallet -->
+            <div class="action-card">
+                <h3>💰 Add Money (Direct)</h3>
+                <p style="color: #666; margin-bottom: 1rem;">Add funds directly to your wallet for testing</p>
+                <form id="addMoneyForm">
+                    <div class="form-group">
+                        <label for="addAmount">Amount ($)</label>
+                        <input type="number" id="addAmount" name="amount" min="0.01" step="0.01" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="addMoneyBtn">Add Money</button>
+                </form>
             </div>
 
-            <div class="placeholder-card">
-                <div class="placeholder-icon">🔄</div>
-                <h3>Transactions</h3>
-                <p>Send, receive, and track all your Glo Coin transactions in one place.</p>
+            <!-- Withdraw Money -->
+            <div class="action-card">
+                <h3>🏦 Withdraw Money</h3>
+                <p style="color: #666; margin-bottom: 1rem;">Withdraw funds from your wallet to your bank account</p>
+                <form id="withdrawForm">
+                    <div class="form-group">
+                        <label for="withdrawAmount">Amount ($)</label>
+                        <input type="number" id="withdrawAmount" name="amount" min="0.01" step="0.01" required>
+                    </div>
+                    <button type="submit" class="btn btn-danger" id="withdrawBtn">Withdraw Money</button>
+                </form>
+                <button type="button" class="btn btn-info" id="viewHistoryBtn" style="margin-top: 1rem;">View Withdrawal History</button>
             </div>
 
-            <div class="placeholder-card">
-                <div class="placeholder-icon">⚙️</div>
-                <h3>Settings</h3>
-                <p>Configure your Glo Coin preferences and account settings.</p>
+            <!-- Convert Money to Glo Coin -->
+            <div class="action-card">
+                <h3>🔄 Convert Money to Glo Coin</h3>
+                <p style="color: #666; margin-bottom: 1rem;">Convert your wallet money to Glo Coins (1:1 ratio)</p>
+                <form id="convertToGloForm">
+                    <div class="form-group">
+                        <label for="convertToGloAmount">Amount ($)</label>
+                        <input type="number" id="convertToGloAmount" name="amount" min="0.01" step="0.01" required>
+                    </div>
+                    <button type="submit" class="btn btn-success" id="convertToGloBtn">Convert to Glo Coin</button>
+                </form>
+            </div>
+
+            <!-- Convert Glo Coin to Money -->
+            <div class="action-card">
+                <h3>🔄 Convert Glo Coin to Money</h3>
+                <p style="color: #666; margin-bottom: 1rem;">Convert your Glo Coins back to money (1:1 ratio)</p>
+                <form id="convertToMoneyForm">
+                    <div class="form-group">
+                        <label for="convertToMoneyAmount">Amount (Glo Coins)</label>
+                        <input type="number" id="convertToMoneyAmount" name="amount" min="0.01" step="0.01" required>
+                    </div>
+                    <button type="submit" class="btn btn-warning" id="convertToMoneyBtn">Convert to Money</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- JusPay Payment Modal -->
+        <div id="paymentModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>JusPay Payment</h3>
+                    <span class="close" id="closePaymentModal">&times;</span>
+                </div>
+                <div id="paymentContent">
+                    <div class="payment-info">
+                        <h4>Payment Details</h4>
+                        <p><strong>Order ID:</strong> <span id="paymentOrderId">-</span></p>
+                        <p><strong>Amount:</strong> ₹<span id="paymentAmount">0</span></p>
+                        <p><strong>Status:</strong> <span id="paymentStatus">Processing...</span></p>
+                    </div>
+                    <div class="payment-simulation">
+                        <h4>Simulate Payment (Testing)</h4>
+                        <p>This is a sandbox environment. Choose the payment outcome:</p>
+                        <button type="button" class="btn btn-success" id="simulateSuccess">Simulate Success</button>
+                        <button type="button" class="btn btn-danger" id="simulateFailure">Simulate Failure</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order History Modal -->
+        <div id="orderModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Order History</h3>
+                    <span class="close" id="closeOrderModal">&times;</span>
+                </div>
+                <div class="transaction-history" id="orderHistory">
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdrawal History Modal -->
+        <div id="historyModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Withdrawal History</h3>
+                    <span class="close" id="closeModal">&times;</span>
+                </div>
+                <div class="transaction-history" id="transactionHistory">
+                    <p>Loading...</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        let currentUser = null;
+
         // Load user info when page loads
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const response = await fetch('/user');
                 if (response.ok) {
-                    const user = await response.json();
-                    document.getElementById('userWelcome').textContent = `Welcome, ${user.username}!`;
+                    currentUser = await response.json();
+                    document.getElementById('userWelcome').textContent = `Welcome, ${currentUser.username}!`;
+                    updateBalanceDisplay();
                 } else {
                     // User not authenticated, redirect to login
                     window.location.href = '/login';
@@ -260,15 +663,297 @@
                 console.error('Error loading user info:', error);
                 window.location.href = '/login';
             }
+
+            // Set up form handlers
+            setupFormHandlers();
         });
 
-        async function logout() {
-            const successMessage = document.getElementById('successMessage');
-            const errorMessage = document.getElementById('errorMessage');
+        function updateBalanceDisplay() {
+            if (currentUser) {
+                document.getElementById('walletBalance').textContent = `$${currentUser.wallet_balance.toFixed(2)}`;
+                document.getElementById('gloBalance').textContent = `${currentUser.glo_coin_balance.toFixed(2)}`;
+                document.getElementById('totalWithdrawn').textContent = `$${(currentUser.total_withdrawn || 0).toFixed(2)}`;
+                
+                // Update bank info display
+                updateBankInfoDisplay();
+            }
+        }
+
+        function updateBankInfoDisplay() {
+            if (currentUser && currentUser.bank_account_number) {
+                document.getElementById('bankName').textContent = currentUser.bank_name || '-';
+                document.getElementById('accountHolder').textContent = currentUser.account_holder_name || '-';
+                document.getElementById('accountNumber').textContent = currentUser.bank_account_number || '-';
+                document.getElementById('routingNumber').textContent = currentUser.bank_routing_number || '-';
+                document.getElementById('bankInfo').style.display = 'block';
+                
+                // Pre-fill form with existing data
+                document.getElementById('bankNameInput').value = currentUser.bank_name || '';
+                document.getElementById('accountHolderInput').value = currentUser.account_holder_name || '';
+                document.getElementById('accountNumberInput').value = currentUser.bank_account_number || '';
+                document.getElementById('routingNumberInput').value = currentUser.bank_routing_number || '';
+            } else {
+                document.getElementById('bankInfo').style.display = 'none';
+            }
+        }
+
+        function setupFormHandlers() {
+            // Bank Form
+            document.getElementById('bankForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const bankData = {
+                    bank_name: formData.get('bank_name'),
+                    account_holder_name: formData.get('account_holder_name'),
+                    bank_account_number: formData.get('bank_account_number'),
+                    bank_routing_number: formData.get('bank_routing_number')
+                };
+                
+                await handleBankUpdate(bankData);
+            });
+
+            // Add Money Form
+            document.getElementById('addMoneyForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const amount = parseFloat(formData.get('amount'));
+                
+                if (amount <= 0) {
+                    showError('Please enter a valid amount');
+                    return;
+                }
+                
+                await handleWalletAction('/wallet/add', { amount }, 'addMoneyBtn', 'Adding...');
+                e.target.reset();
+            });
+
+            // Withdraw Money Form
+            document.getElementById('withdrawForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const amount = parseFloat(formData.get('amount'));
+                
+                if (amount <= 0) {
+                    showError('Please enter a valid amount');
+                    return;
+                }
+                
+                if (amount > currentUser.wallet_balance) {
+                    showError('Insufficient wallet balance');
+                    return;
+                }
+                
+                if (!currentUser.bank_account_number) {
+                    showError('Please add your bank account details first');
+                    return;
+                }
+                
+                await handleWalletAction('/wallet/withdraw', { amount }, 'withdrawBtn', 'Processing...');
+                e.target.reset();
+            });
+
+            // Convert to Glo Coin Form
+            document.getElementById('convertToGloForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const amount = parseFloat(formData.get('amount'));
+                
+                if (amount <= 0) {
+                    showError('Please enter a valid amount');
+                    return;
+                }
+                
+                if (amount > currentUser.wallet_balance) {
+                    showError('Insufficient wallet balance');
+                    return;
+                }
+                
+                await handleWalletAction('/wallet/convert-to-glo', { amount }, 'convertToGloBtn', 'Converting...');
+                e.target.reset();
+            });
+
+            // Convert to Money Form
+            document.getElementById('convertToMoneyForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const amount = parseFloat(formData.get('amount'));
+                
+                if (amount <= 0) {
+                    showError('Please enter a valid amount');
+                    return;
+                }
+                
+                if (amount > currentUser.glo_coin_balance) {
+                    showError('Insufficient Glo Coin balance');
+                    return;
+                }
+                
+                await handleWalletAction('/wallet/convert-to-money', { amount }, 'convertToMoneyBtn', 'Converting...');
+                e.target.reset();
+            });
+
+            // Modal handlers
+            document.getElementById('viewHistoryBtn').addEventListener('click', showWithdrawalHistory);
+            document.getElementById('closeModal').addEventListener('click', hideModal);
+            document.getElementById('historyModal').addEventListener('click', (e) => {
+                if (e.target.id === 'historyModal') hideModal();
+            });
+        }
+
+        async function handleWalletAction(endpoint, data, buttonId, loadingText) {
+            const button = document.getElementById(buttonId);
+            const originalText = button.textContent;
             
             // Reset messages
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
+            hideMessages();
+            
+            // Disable button
+            button.disabled = true;
+            button.textContent = loadingText;
+            
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showSuccess(result.message);
+                    // Update current user balances
+                    currentUser.wallet_balance = result.wallet_balance;
+                    currentUser.glo_coin_balance = result.glo_coin_balance;
+                    if (result.total_withdrawn !== undefined) {
+                        currentUser.total_withdrawn = result.total_withdrawn;
+                    }
+                    updateBalanceDisplay();
+                } else {
+                    showError(result.error);
+                }
+            } catch (error) {
+                console.error('Wallet action error:', error);
+                showError('An error occurred. Please try again.');
+            } finally {
+                // Re-enable button
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        }
+
+        async function handleBankUpdate(bankData) {
+            const button = document.getElementById('bankBtn');
+            const originalText = button.textContent;
+            
+            // Reset messages
+            hideMessages();
+            
+            // Disable button
+            button.disabled = true;
+            button.textContent = 'Saving...';
+            
+            try {
+                const response = await fetch('/bank/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(bankData),
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showSuccess(result.message);
+                    // Update current user bank details
+                    currentUser.bank_name = bankData.bank_name;
+                    currentUser.account_holder_name = bankData.account_holder_name;
+                    currentUser.bank_account_number = bankData.bank_account_number;
+                    currentUser.bank_routing_number = bankData.bank_routing_number;
+                    updateBankInfoDisplay();
+                } else {
+                    showError(result.error);
+                }
+            } catch (error) {
+                console.error('Bank update error:', error);
+                showError('An error occurred. Please try again.');
+            } finally {
+                // Re-enable button
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        }
+
+        async function showWithdrawalHistory() {
+            document.getElementById('historyModal').style.display = 'block';
+            document.getElementById('transactionHistory').innerHTML = '<p>Loading...</p>';
+            
+            try {
+                const response = await fetch('/wallet/withdrawals');
+                const result = await response.json();
+                
+                if (response.ok) {
+                    displayTransactionHistory(result.transactions);
+                } else {
+                    document.getElementById('transactionHistory').innerHTML = '<p>Error loading history</p>';
+                }
+            } catch (error) {
+                console.error('Error loading withdrawal history:', error);
+                document.getElementById('transactionHistory').innerHTML = '<p>Error loading history</p>';
+            }
+        }
+
+        function displayTransactionHistory(transactions) {
+            const historyContainer = document.getElementById('transactionHistory');
+            
+            if (!transactions || transactions.length === 0) {
+                historyContainer.innerHTML = '<p>No withdrawal history found.</p>';
+                return;
+            }
+            
+            const historyHTML = transactions.map(tx => `
+                <div class="transaction-item">
+                    <div class="transaction-details">
+                        <h4>Withdrawal to ${tx.bank_name}</h4>
+                        <p>Transaction ID: ${tx.transaction_id}</p>
+                        <p>Date: ${new Date(tx.created_at).toLocaleDateString()}</p>
+                        <p>Status: ${tx.transaction_status}</p>
+                    </div>
+                    <div class="transaction-amount">-$${tx.amount.toFixed(2)}</div>
+                </div>
+            `).join('');
+            
+            historyContainer.innerHTML = historyHTML;
+        }
+
+        function hideModal() {
+            document.getElementById('historyModal').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const successElement = document.getElementById('successMessage');
+            successElement.textContent = message;
+            successElement.style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        async function logout() {
+            hideMessages();
             
             try {
                 const response = await fetch('/logout', {
@@ -278,23 +963,23 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    successMessage.textContent = data.message;
-                    successMessage.style.display = 'block';
+                    showSuccess(data.message);
                     
                     // Redirect to login after successful logout
                     setTimeout(() => {
                         window.location.href = '/login';
                     }, 1000);
                 } else {
-                    errorMessage.textContent = data.error || 'Logout failed';
-                    errorMessage.style.display = 'block';
+                    showError(data.error || 'Logout failed');
                 }
             } catch (error) {
                 console.error('Logout error:', error);
-                errorMessage.textContent = 'An error occurred during logout';
-                errorMessage.style.display = 'block';
+                showError('An error occurred during logout');
             }
         }
     </script>
+    
+    <!-- JusPay Integration Script -->
+    <script src="/juspay-integration.js"></script>
 </body>
 </html>

@@ -4,9 +4,14 @@ const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const path = require('path');
+const JusPayService = require('./services/JusPayService');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Initialize JusPay service
+const jusPayService = new JusPayService();
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -15,10 +20,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Session configuration
 app.use(session({
-    secret: 'your-secret-key',
+    secret: 'glocoin_super_secret_key_2025_juspay_integration',
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false } // Set to true for HTTPS
+    saveUninitialized: false,
+    cookie: { 
+        secure: false, // Set to true for HTTPS
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
 }));
 
 // Initialize SQLite database
@@ -34,12 +43,62 @@ const db = new sqlite3.Database('./users.db', (err) => {
             username TEXT UNIQUE NOT NULL,
             email TEXT UNIQUE,
             password TEXT NOT NULL,
+            wallet_balance REAL DEFAULT 0.0,
+            glo_coin_balance REAL DEFAULT 0.0,
+            bank_account_number TEXT,
+            bank_name TEXT,
+            bank_routing_number TEXT,
+            account_holder_name TEXT,
+            total_withdrawn REAL DEFAULT 0.0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`, (err) => {
             if (err) {
                 console.error('Error creating users table:', err.message);
             } else {
                 console.log('Users table ready');
+                
+                // Add new columns if they don't exist (for existing databases)
+                db.run(`ALTER TABLE users ADD COLUMN wallet_balance REAL DEFAULT 0.0`, (err) => {
+                    if (err && !err.message.includes('duplicate column')) {
+                        console.error('Error adding wallet_balance column:', err.message);
+                    }
+                });
+                
+                db.run(`ALTER TABLE users ADD COLUMN glo_coin_balance REAL DEFAULT 0.0`, (err) => {
+                    if (err && !err.message.includes('duplicate column')) {
+                        console.error('Error adding glo_coin_balance column:', err.message);
+                    }
+                });
+                
+                db.run(`ALTER TABLE users ADD COLUMN bank_account_number TEXT`, (err) => {
+                    if (err && !err.message.includes('duplicate column')) {
+                        console.error('Error adding bank_account_number column:', err.message);
+                    }
+                });
+                
+                db.run(`ALTER TABLE users ADD COLUMN bank_name TEXT`, (err) => {
+                    if (err && !err.message.includes('duplicate column')) {
+                        console.error('Error adding bank_name column:', err.message);
+                    }
+                });
+                
+                db.run(`ALTER TABLE users ADD COLUMN bank_routing_number TEXT`, (err) => {
+                    if (err && !err.message.includes('duplicate column')) {
+                        console.error('Error adding bank_routing_number column:', err.message);
+                    }
+                });
+                
+                db.run(`ALTER TABLE users ADD COLUMN account_holder_name TEXT`, (err) => {
+                    if (err && !err.message.includes('duplicate column')) {
+                        console.error('Error adding account_holder_name column:', err.message);
+                    }
+                });
+                
+                db.run(`ALTER TABLE users ADD COLUMN total_withdrawn REAL DEFAULT 0.0`, (err) => {
+                    if (err && !err.message.includes('duplicate column')) {
+                        console.error('Error adding total_withdrawn column:', err.message);
+                    }
+                });
                 
                 // Insert demo user if it doesn't exist
                 const demoUsername = 'demouser';
@@ -67,14 +126,57 @@ const db = new sqlite3.Database('./users.db', (err) => {
                         });
                     } else {
                         console.log('Demo user already exists');
+                            }
+                        });
                     }
                 });
             }
         });
-    }
-});
-
-// Routes
+        
+        // Create withdrawal transactions table
+        db.run(`CREATE TABLE IF NOT EXISTS withdrawal_transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            amount REAL NOT NULL,
+            bank_account_number TEXT NOT NULL,
+            bank_name TEXT NOT NULL,
+            account_holder_name TEXT NOT NULL,
+            transaction_status TEXT DEFAULT 'pending',
+            transaction_id TEXT UNIQUE,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            processed_at DATETIME,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )`, (err) => {
+            if (err) {
+                console.error('Error creating withdrawal_transactions table:', err.message);
+            } else {
+                console.log('Withdrawal transactions table ready');
+            }
+        });
+        
+        // Create orders table for JusPay integration
+        db.run(`CREATE TABLE IF NOT EXISTS orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            order_id TEXT UNIQUE NOT NULL,
+            session_id TEXT,
+            amount REAL NOT NULL,
+            currency TEXT DEFAULT 'INR',
+            status TEXT DEFAULT 'PENDING',
+            payment_method TEXT,
+            transaction_id TEXT,
+            gateway_reference_id TEXT,
+            juspay_response TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )`, (err) => {
+            if (err) {
+                console.error('Error creating orders table:', err.message);
+            } else {
+                console.log('Orders table ready');
+            }
+        });// Routes
 app.get('/', (req, res) => {
     if (req.session.user) {
         res.sendFile(path.join(__dirname, 'public', 'glo-coin.html'));
@@ -208,10 +310,586 @@ app.post('/logout', (req, res) => {
 // Get user info endpoint
 app.get('/user', (req, res) => {
     if (req.session.user) {
-        res.json(req.session.user);
+        // Get updated user info including wallet balances and bank details
+        db.get('SELECT id, username, email, wallet_balance, glo_coin_balance, bank_account_number, bank_name, bank_routing_number, account_holder_name, total_withdrawn FROM users WHERE id = ?', 
+            [req.session.user.id], (err, user) => {
+                if (err) {
+                    console.error('Database error:', err.message);
+                    return res.status(500).json({ error: 'Database error' });
+                }
+                if (user) {
+                    res.json(user);
+                } else {
+                    res.status(404).json({ error: 'User not found' });
+                }
+            });
     } else {
         res.status(401).json({ error: 'Not authenticated' });
     }
+});
+
+// Test endpoint to check session
+app.get('/session-test', (req, res) => {
+    res.json({
+        hasSession: !!req.session.user,
+        sessionUser: req.session.user || null,
+        sessionId: req.sessionID
+    });
+});
+
+// Add money to wallet endpoint
+app.post('/wallet/add', (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const { amount } = req.body;
+    
+    if (!amount || amount <= 0) {
+        return res.status(400).json({ error: 'Invalid amount' });
+    }
+    
+    const userId = req.session.user.id;
+    
+    db.run('UPDATE users SET wallet_balance = wallet_balance + ? WHERE id = ?', 
+        [amount, userId], function(err) {
+            if (err) {
+                console.error('Database error:', err.message);
+                return res.status(500).json({ error: 'Database error' });
+            }
+            
+            // Get updated balance
+            db.get('SELECT wallet_balance, glo_coin_balance FROM users WHERE id = ?', 
+                [userId], (err, user) => {
+                    if (err) {
+                        console.error('Database error:', err.message);
+                        return res.status(500).json({ error: 'Database error' });
+                    }
+                    
+                    res.json({ 
+                        success: true, 
+                        message: `Added $${amount} to wallet`,
+                        wallet_balance: user.wallet_balance,
+                        glo_coin_balance: user.glo_coin_balance
+                    });
+                });
+        });
+});
+
+// Convert money to Glo Coin endpoint
+app.post('/wallet/convert-to-glo', (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const { amount } = req.body;
+    
+    if (!amount || amount <= 0) {
+        return res.status(400).json({ error: 'Invalid amount' });
+    }
+    
+    const userId = req.session.user.id;
+    
+    // Check if user has sufficient wallet balance
+    db.get('SELECT wallet_balance, glo_coin_balance FROM users WHERE id = ?', 
+        [userId], (err, user) => {
+            if (err) {
+                console.error('Database error:', err.message);
+                return res.status(500).json({ error: 'Database error' });
+            }
+            
+            if (user.wallet_balance < amount) {
+                return res.status(400).json({ error: 'Insufficient wallet balance' });
+            }
+            
+            // Convert $1 = 1 Glo Coin (1:1 ratio)
+            const gloCoinsToAdd = amount;
+            
+            db.run('UPDATE users SET wallet_balance = wallet_balance - ?, glo_coin_balance = glo_coin_balance + ? WHERE id = ?', 
+                [amount, gloCoinsToAdd, userId], function(err) {
+                    if (err) {
+                        console.error('Database error:', err.message);
+                        return res.status(500).json({ error: 'Database error' });
+                    }
+                    
+                    // Get updated balances
+                    db.get('SELECT wallet_balance, glo_coin_balance FROM users WHERE id = ?', 
+                        [userId], (err, updatedUser) => {
+                            if (err) {
+                                console.error('Database error:', err.message);
+                                return res.status(500).json({ error: 'Database error' });
+                            }
+                            
+                            res.json({ 
+                                success: true, 
+                                message: `Converted $${amount} to ${gloCoinsToAdd} Glo Coins`,
+                                wallet_balance: updatedUser.wallet_balance,
+                                glo_coin_balance: updatedUser.glo_coin_balance
+                            });
+                        });
+                });
+        });
+});
+
+// Convert Glo Coin to money endpoint
+app.post('/wallet/convert-to-money', (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const { amount } = req.body;
+    
+    if (!amount || amount <= 0) {
+        return res.status(400).json({ error: 'Invalid amount' });
+    }
+    
+    const userId = req.session.user.id;
+    
+    // Check if user has sufficient Glo Coin balance
+    db.get('SELECT wallet_balance, glo_coin_balance FROM users WHERE id = ?', 
+        [userId], (err, user) => {
+            if (err) {
+                console.error('Database error:', err.message);
+                return res.status(500).json({ error: 'Database error' });
+            }
+            
+            if (user.glo_coin_balance < amount) {
+                return res.status(400).json({ error: 'Insufficient Glo Coin balance' });
+            }
+            
+            // Convert 1 Glo Coin = $1 (1:1 ratio)
+            const moneyToAdd = amount;
+            
+            db.run('UPDATE users SET wallet_balance = wallet_balance + ?, glo_coin_balance = glo_coin_balance - ? WHERE id = ?', 
+                [moneyToAdd, amount, userId], function(err) {
+                    if (err) {
+                        console.error('Database error:', err.message);
+                        return res.status(500).json({ error: 'Database error' });
+                    }
+                    
+                    // Get updated balances
+                    db.get('SELECT wallet_balance, glo_coin_balance FROM users WHERE id = ?', 
+                        [userId], (err, updatedUser) => {
+                            if (err) {
+                                console.error('Database error:', err.message);
+                                return res.status(500).json({ error: 'Database error' });
+                            }
+                            
+                            res.json({ 
+                                success: true, 
+                                message: `Converted ${amount} Glo Coins to $${moneyToAdd}`,
+                                wallet_balance: updatedUser.wallet_balance,
+                                glo_coin_balance: updatedUser.glo_coin_balance
+                            });
+                        });
+                });
+        });
+});
+
+// Update bank account details endpoint
+app.post('/bank/update', (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const { bank_account_number, bank_name, bank_routing_number, account_holder_name } = req.body;
+    
+    if (!bank_account_number || !bank_name || !bank_routing_number || !account_holder_name) {
+        return res.status(400).json({ error: 'All bank account fields are required' });
+    }
+    
+    const userId = req.session.user.id;
+    
+    db.run('UPDATE users SET bank_account_number = ?, bank_name = ?, bank_routing_number = ?, account_holder_name = ? WHERE id = ?', 
+        [bank_account_number, bank_name, bank_routing_number, account_holder_name, userId], function(err) {
+            if (err) {
+                console.error('Database error:', err.message);
+                return res.status(500).json({ error: 'Database error' });
+            }
+            
+            res.json({ 
+                success: true, 
+                message: 'Bank account details updated successfully' 
+            });
+        });
+});
+
+// Withdraw money endpoint
+app.post('/wallet/withdraw', (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const { amount } = req.body;
+    
+    if (!amount || amount <= 0) {
+        return res.status(400).json({ error: 'Invalid amount' });
+    }
+    
+    const userId = req.session.user.id;
+    
+    // Check if user has sufficient wallet balance and bank account details
+    db.get('SELECT wallet_balance, glo_coin_balance, bank_account_number, bank_name, bank_routing_number, account_holder_name, total_withdrawn FROM users WHERE id = ?', 
+        [userId], (err, user) => {
+            if (err) {
+                console.error('Database error:', err.message);
+                return res.status(500).json({ error: 'Database error' });
+            }
+            
+            if (!user.bank_account_number || !user.bank_name || !user.account_holder_name) {
+                return res.status(400).json({ error: 'Please add your bank account details first' });
+            }
+            
+            if (user.wallet_balance < amount) {
+                return res.status(400).json({ error: 'Insufficient wallet balance' });
+            }
+            
+            // Generate transaction ID
+            const transactionId = 'WTX' + Date.now() + Math.random().toString(36).substr(2, 9).toUpperCase();
+            
+            // Begin transaction
+            db.serialize(() => {
+                db.run('BEGIN TRANSACTION');
+                
+                // Update wallet balance and total withdrawn
+                db.run('UPDATE users SET wallet_balance = wallet_balance - ?, total_withdrawn = total_withdrawn + ? WHERE id = ?', 
+                    [amount, amount, userId], function(err) {
+                        if (err) {
+                            db.run('ROLLBACK');
+                            console.error('Database error:', err.message);
+                            return res.status(500).json({ error: 'Database error' });
+                        }
+                        
+                        // Insert withdrawal transaction record
+                        db.run('INSERT INTO withdrawal_transactions (user_id, amount, bank_account_number, bank_name, account_holder_name, transaction_status, transaction_id) VALUES (?, ?, ?, ?, ?, ?, ?)', 
+                            [userId, amount, user.bank_account_number, user.bank_name, user.account_holder_name, 'completed', transactionId], function(err) {
+                                if (err) {
+                                    db.run('ROLLBACK');
+                                    console.error('Database error:', err.message);
+                                    return res.status(500).json({ error: 'Database error' });
+                                }
+                                
+                                db.run('COMMIT');
+                                
+                                // Get updated balances
+                                db.get('SELECT wallet_balance, glo_coin_balance, total_withdrawn FROM users WHERE id = ?', 
+                                    [userId], (err, updatedUser) => {
+                                        if (err) {
+                                            console.error('Database error:', err.message);
+                                            return res.status(500).json({ error: 'Database error' });
+                                        }
+                                        
+                                        res.json({ 
+                                            success: true, 
+                                            message: `Successfully withdrew $${amount} to ${user.bank_name} account`,
+                                            transaction_id: transactionId,
+                                            wallet_balance: updatedUser.wallet_balance,
+                                            glo_coin_balance: updatedUser.glo_coin_balance,
+                                            total_withdrawn: updatedUser.total_withdrawn
+                                        });
+                                    });
+                            });
+                    });
+            });
+        });
+});
+
+// Get withdrawal history endpoint
+app.get('/wallet/withdrawals', (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const userId = req.session.user.id;
+    
+    db.all('SELECT * FROM withdrawal_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT 20', 
+        [userId], (err, transactions) => {
+            if (err) {
+                console.error('Database error:', err.message);
+                return res.status(500).json({ error: 'Database error' });
+            }
+            
+            res.json({ 
+                success: true, 
+                transactions: transactions || []
+            });
+        });
+});
+
+// JusPay Integration Endpoints
+
+// Create payment order
+app.post('/payment/create-order', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const { amount, currency = 'INR' } = req.body;
+    
+    if (!amount || amount <= 0) {
+        return res.status(400).json({ error: 'Invalid amount' });
+    }
+
+    const userId = req.session.user.id;
+
+    try {
+        // Generate mock order data
+        const orderData = jusPayService.generateMockOrder(amount, currency);
+        
+        // Create payment session with JusPay
+        const paymentSession = await jusPayService.createPaymentSession(orderData);
+        
+        // Store order in database
+        db.run(`INSERT INTO orders (user_id, order_id, session_id, amount, currency, status, juspay_response) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)`, 
+            [userId, orderData.order_id, paymentSession.session_id, amount, currency, 'PENDING', JSON.stringify(paymentSession)], 
+            function(err) {
+                if (err) {
+                    console.error('Database error:', err.message);
+                    return res.status(500).json({ error: 'Database error' });
+                }
+                
+                console.log('Order created:', orderData.order_id);
+                res.json({
+                    success: true,
+                    order_id: orderData.order_id,
+                    session_id: paymentSession.session_id,
+                    payment_page_url: paymentSession.payment_page_url,
+                    sdk_payload: paymentSession.sdk_payload,
+                    amount: amount,
+                    currency: currency
+                });
+            });
+    } catch (error) {
+        console.error('Payment creation error:', error.message);
+        res.status(500).json({ error: 'Failed to create payment order' });
+    }
+});
+
+// Process mock payment completion
+app.post('/payment/complete', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const { order_id, success = true } = req.body;
+    
+    if (!order_id) {
+        return res.status(400).json({ error: 'Order ID is required' });
+    }
+
+    try {
+        // Get order from database
+        db.get('SELECT * FROM orders WHERE order_id = ? AND user_id = ?', 
+            [order_id, req.session.user.id], async (err, order) => {
+                if (err) {
+                    console.error('Database error:', err.message);
+                    return res.status(500).json({ error: 'Database error' });
+                }
+                
+                if (!order) {
+                    return res.status(404).json({ error: 'Order not found' });
+                }
+
+                // Process mock payment
+                const paymentResult = await jusPayService.processMockPayment(order_id, success);
+                
+                // Update order status
+                const newStatus = success ? 'CHARGED' : 'FAILED';
+                db.run(`UPDATE orders SET status = ?, transaction_id = ?, gateway_reference_id = ?, 
+                        juspay_response = ?, updated_at = CURRENT_TIMESTAMP WHERE order_id = ?`, 
+                    [newStatus, paymentResult.transaction_id, paymentResult.gateway_reference_id, 
+                     JSON.stringify(paymentResult), order_id], (err) => {
+                        if (err) {
+                            console.error('Database error:', err.message);
+                            return res.status(500).json({ error: 'Database error' });
+                        }
+
+                        if (success) {
+                            // Add money to user's wallet on successful payment
+                            db.run('UPDATE users SET wallet_balance = wallet_balance + ? WHERE id = ?', 
+                                [order.amount, req.session.user.id], (err) => {
+                                    if (err) {
+                                        console.error('Database error:', err.message);
+                                        return res.status(500).json({ error: 'Database error' });
+                                    }
+                                    
+                                    console.log('Payment completed successfully:', order_id);
+                                    res.json({
+                                        success: true,
+                                        message: `Payment of ₹${order.amount} completed successfully`,
+                                        order_id: order_id,
+                                        transaction_id: paymentResult.transaction_id,
+                                        amount: order.amount,
+                                        status: newStatus
+                                    });
+                                });
+                        } else {
+                            console.log('Payment failed:', order_id);
+                            res.json({
+                                success: false,
+                                message: `Payment of ₹${order.amount} failed`,
+                                order_id: order_id,
+                                status: newStatus
+                            });
+                        }
+                    });
+            });
+    } catch (error) {
+        console.error('Payment completion error:', error.message);
+        res.status(500).json({ error: 'Failed to complete payment' });
+    }
+});
+
+// Get payment status
+app.get('/payment/status/:orderId', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const { orderId } = req.params;
+
+    try {
+        // Get order from database
+        db.get('SELECT * FROM orders WHERE order_id = ? AND user_id = ?', 
+            [orderId, req.session.user.id], async (err, order) => {
+                if (err) {
+                    console.error('Database error:', err.message);
+                    return res.status(500).json({ error: 'Database error' });
+                }
+                
+                if (!order) {
+                    return res.status(404).json({ error: 'Order not found' });
+                }
+
+                // Get latest status from JusPay (mock)
+                const paymentStatus = await jusPayService.getPaymentStatus(orderId);
+                
+                res.json({
+                    success: true,
+                    order: {
+                        order_id: order.order_id,
+                        amount: order.amount,
+                        currency: order.currency,
+                        status: order.status,
+                        created_at: order.created_at,
+                        updated_at: order.updated_at,
+                        transaction_id: order.transaction_id,
+                        gateway_reference_id: order.gateway_reference_id
+                    },
+                    juspay_status: paymentStatus
+                });
+            });
+    } catch (error) {
+        console.error('Payment status error:', error.message);
+        res.status(500).json({ error: 'Failed to get payment status' });
+    }
+});
+
+// Get user's order history
+app.get('/payment/orders', (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const userId = req.session.user.id;
+    
+    db.all('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT 20', 
+        [userId], (err, orders) => {
+            if (err) {
+                console.error('Database error:', err.message);
+                return res.status(500).json({ error: 'Database error' });
+            }
+            
+            res.json({ 
+                success: true, 
+                orders: orders || []
+            });
+        });
+});
+
+// Mock JusPay webhook endpoint
+app.post('/api/payment/callback', (req, res) => {
+    console.log('=== JusPay Webhook Received ===');
+    console.log('Headers:', req.headers);
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+    console.log('================================');
+    
+    try {
+        // In production, you would validate the webhook signature here
+        // const isValid = jusPayService.validateWebhookSignature(req.body, req.headers['x-juspay-signature']);
+        
+        const { 
+            order_id, 
+            status, 
+            transaction_id, 
+            amount, 
+            currency,
+            event_name,
+            txn_id,
+            merchant_id
+        } = req.body;
+        
+        // Validate merchant ID if provided
+        if (merchant_id && merchant_id !== process.env.JUSPAY_MERCHANT_ID) {
+            console.error('Invalid merchant ID in webhook:', merchant_id);
+            return res.status(400).json({ error: 'Invalid merchant ID' });
+        }
+        
+        // Log the webhook event
+        console.log(`Processing webhook event: ${event_name || 'status_update'}`);
+        console.log(`Order ID: ${order_id}, Status: ${status}, Amount: ${amount}`);
+        
+        // Update order status based on webhook
+        db.run(`UPDATE orders SET 
+                status = ?, 
+                transaction_id = ?, 
+                txn_id = ?,
+                webhook_data = ?,
+                updated_at = CURRENT_TIMESTAMP 
+                WHERE order_id = ?`, 
+            [status, transaction_id || txn_id, txn_id || transaction_id, JSON.stringify(req.body), order_id], 
+            function(err) {
+                if (err) {
+                    console.error('Webhook database error:', err.message);
+                    return res.status(500).json({ error: 'Database error' });
+                }
+                
+                console.log('Order updated via webhook:', order_id, 'Status:', status);
+                
+                // If payment successful, you can add logic to update user wallet/credits
+                if (status === 'CHARGED' || status === 'charged' || status === 'SUCCESSFUL') {
+                    console.log(`Payment successful for order ${order_id}, amount: ${amount}`);
+                    // Add wallet credit logic here if needed
+                }
+                
+                res.json({ 
+                    success: true, 
+                    message: 'Webhook processed successfully',
+                    order_id: order_id,
+                    status: status
+                });
+            });
+    } catch (error) {
+        console.error('Webhook processing error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.get('/webhook-test', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'webhook-test.html'));
+});
+
+// Additional webhook endpoint for different JusPay events
+app.post('/webhook/juspay', (req, res) => {
+    console.log('=== JusPay Event Webhook ===');
+    console.log('Event received:', JSON.stringify(req.body, null, 2));
+    console.log('============================');
+    
+    // This endpoint can handle different types of JusPay events
+    // Forward to main webhook handler
+    req.url = '/api/payment/callback';
+    app.handle(req, res);
 });
 
 // Start server
