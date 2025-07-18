@@ -1,6 +1,5 @@
 // JusPay Integration JavaScript
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize JusPay integration
     initializeJusPayIntegration();
 });
 
@@ -219,48 +218,5 @@ function initializeJusPayIntegration() {
                 btn.textContent = 'Simulate Failure';
             }
         };
-    }
-}
-
-// Utility function to check payment status
-async function checkPaymentStatus(orderId) {
-    try {
-        const response = await fetch(`/api/payment/status/${orderId}`);
-        const data = await response.json();
-        
-        if (data.success) {
-            return data.order;
-        } else {
-            console.error('Error checking payment status:', data.message);
-            return null;
-        }
-    } catch (error) {
-        console.error('Error checking payment status:', error);
-        return null;
-    }
-}
-
-// Update balance function for JusPay integration
-async function updateBalanceFromJusPay() {
-    try {
-        const response = await fetch('/api/balance');
-        const data = await response.json();
-        
-        if (data.success) {
-            const walletBalanceEl = document.getElementById('walletBalance');
-            const gloBalanceEl = document.getElementById('gloBalance');
-            
-            if (walletBalanceEl) {
-                walletBalanceEl.textContent = data.balance.wallet_balance.toFixed(2);
-            }
-            
-            if (gloBalanceEl) {
-                gloBalanceEl.textContent = data.balance.glo_coin_balance.toFixed(2);
-            }
-        } else {
-            console.error('Error fetching balance:', data.message);
-        }
-    } catch (error) {
-        console.error('Error fetching balance:', error);
     }
 }

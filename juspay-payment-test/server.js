@@ -5,15 +5,13 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const path = require('path');
 const JusPayService = require('./services/JusPayService');
-const JusPayWebhookSender = require('./webhook-sender');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Initialize JusPay service and webhook sender
+// Initialize JusPay service
 const jusPayService = new JusPayService();
-const webhookSender = new JusPayWebhookSender();
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -717,10 +715,6 @@ app.post('/payment/create-order', async (req, res) => {
         // Create payment session with JusPay
         const paymentSession = await jusPayService.createPaymentSession(orderData);
         
-        // Send order data to JusPay dashboard via webhook
-        const webhookResult = await webhookSender.sendOrderCreated(orderData);
-        console.log('JusPay dashboard webhook sent:', webhookResult);
-        
         // Store order in database
         db.run(`INSERT INTO orders (user_id, order_id, session_id, amount, currency, status, customer_id, juspay_response) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, 
@@ -778,14 +772,8 @@ app.post('/payment/complete', async (req, res) => {
                 // Process mock payment
                 const paymentResult = await jusPayService.processMockPayment(order_id, success);
                 
-                // Update order status in JusPay dashboard via webhook
+                // Update order status in JusPay dashboard
                 const newStatus = success ? 'CHARGED' : 'FAILED';
-                const webhookStatusResult = await webhookSender.sendPaymentStatusUpdate(order_id, newStatus, {
-                    transaction_id: paymentResult.transaction_id,
-                    payment_method: paymentResult.payment_method,
-                    gateway_reference_id: paymentResult.gateway_reference_id
-                });
-                console.log('JusPay status webhook sent:', webhookStatusResult);
                 
                 // Update order status in local database
                 db.run(`UPDATE orders SET status = ?, transaction_id = ?, gateway_reference_id = ?, 
