@@ -30,7 +30,7 @@ function initializeJusPayIntegration() {
     if (viewOrdersBtn) {
         viewOrdersBtn.onclick = async () => {
             try {
-                const response = await fetch('/api/payment/orders');
+                const response = await fetch('/payment/orders');
                 const data = await response.json();
                 
                 if (data.success) {
@@ -85,7 +85,7 @@ function initializeJusPayIntegration() {
             btn.textContent = 'Processing...';
             
             try {
-                const response = await fetch('/api/payment/create-order', {
+                const response = await fetch('/payment/create-order', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ function initializeJusPayIntegration() {
                     // Clear form
                     document.getElementById('juspayAmount').value = '';
                 } else {
-                    alert('Error: ' + data.message);
+                    alert('Error: ' + (data.message || data.error || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Error creating order:', error);
@@ -137,7 +137,7 @@ function initializeJusPayIntegration() {
             btn.textContent = 'Processing...';
             
             try {
-                const response = await fetch('/api/payment/complete', {
+                const response = await fetch('/payment/complete', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -186,7 +186,7 @@ function initializeJusPayIntegration() {
             btn.textContent = 'Processing...';
             
             try {
-                const response = await fetch('/api/payment/complete', {
+                const response = await fetch('/payment/complete', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

@@ -5,13 +5,15 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const path = require('path');
 const JusPayService = require('./services/JusPayService');
+const JusPayWebhookSender = require('./webhook-sender');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Initialize JusPay service
+// Initialize JusPay service and webhook sender
 const jusPayService = new JusPayService();
+const webhookSender = new JusPayWebhookSender();
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -167,6 +169,11 @@ const db = new sqlite3.Database('./users.db', (err) => {
             transaction_id TEXT,
             gateway_reference_id TEXT,
             juspay_response TEXT,
+            transaction_type TEXT DEFAULT 'PAYMENT',
+            bank_account TEXT,
+            bank_name TEXT,
+            account_holder TEXT,
+            customer_id TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id)
@@ -175,6 +182,37 @@ const db = new sqlite3.Database('./users.db', (err) => {
                 console.error('Error creating orders table:', err.message);
             } else {
                 console.log('Orders table ready');
+                
+                // Add new columns for withdrawal tracking if they don't exist
+                db.run(`ALTER TABLE orders ADD COLUMN transaction_type TEXT DEFAULT 'PAYMENT'`, (err) => {
+                    if (err && !err.message.includes('duplicate column')) {
+                        console.error('Error adding transaction_type column:', err.message);
+                    }
+                });
+                
+                db.run(`ALTER TABLE orders ADD COLUMN bank_account TEXT`, (err) => {
+                    if (err && !err.message.includes('duplicate column')) {
+                        console.error('Error adding bank_account column:', err.message);
+                    }
+                });
+                
+                db.run(`ALTER TABLE orders ADD COLUMN bank_name TEXT`, (err) => {
+                    if (err && !err.message.includes('duplicate column')) {
+                        console.error('Error adding bank_name column:', err.message);
+                    }
+                });
+                
+                db.run(`ALTER TABLE orders ADD COLUMN account_holder TEXT`, (err) => {
+                    if (err && !err.message.includes('duplicate column')) {
+                        console.error('Error adding account_holder column:', err.message);
+                    }
+                });
+                
+                db.run(`ALTER TABLE orders ADD COLUMN customer_id TEXT`, (err) => {
+                    if (err && !err.message.includes('duplicate column')) {
+                        console.error('Error adding customer_id column:', err.message);
+                    }
+                });
             }
         });// Routes
 app.get('/', (req, res) => {
@@ -515,7 +553,7 @@ app.post('/bank/update', (req, res) => {
 });
 
 // Withdraw money endpoint
-app.post('/wallet/withdraw', (req, res) => {
+app.post('/wallet/withdraw', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: 'Not authenticated' });
     }
@@ -569,24 +607,64 @@ app.post('/wallet/withdraw', (req, res) => {
                                     return res.status(500).json({ error: 'Database error' });
                                 }
                                 
-                                db.run('COMMIT');
+                                // Create JusPay withdrawal order for dashboard tracking
+                                const withdrawalOrderData = {
+                                    order_id: 'WITHDRAW_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                                    user_id: userId,
+                                    amount: amount,
+                                    currency: 'INR',
+                                    customer_id: `customer_${userId}`,
+                                    customer_email: `user_${userId}@example.com`,
+                                    customer_phone: '+919999999999',
+                                    description: `Withdrawal to ${user.bank_name} - ${user.account_holder_name}`,
+                                    return_url: `${process.env.WEBHOOK_URL}/withdrawal/success`,
+                                    metadata: {
+                                        source: 'glo-coin-platform',
+                                        type: 'WITHDRAWAL',
+                                        bank_name: user.bank_name,
+                                        account_holder: user.account_holder_name,
+                                        bank_account: user.bank_account_number
+                                    }
+                                };
                                 
-                                // Get updated balances
-                                db.get('SELECT wallet_balance, glo_coin_balance, total_withdrawn FROM users WHERE id = ?', 
-                                    [userId], (err, updatedUser) => {
+                                // Create withdrawal order in JusPay dashboard
+                                jusPayService.createWithdrawalOrder(withdrawalOrderData).then(jusPayResult => {
+                                    console.log('JusPay withdrawal order created successfully:', jusPayResult);
+                                }).catch(error => {
+                                    console.error('JusPay withdrawal order creation failed:', error.message);
+                                    // Continue with withdrawal completion even if JusPay tracking fails
+                                });
+                                
+                                // Insert JusPay withdrawal order in local database
+                                db.run('INSERT INTO orders (order_id, user_id, amount, currency, customer_id, status, transaction_type, bank_account, bank_name, account_holder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+                                    [withdrawalOrderData.order_id, withdrawalOrderData.user_id, withdrawalOrderData.amount, withdrawalOrderData.currency, withdrawalOrderData.customer_id, 'WITHDRAWAL_INITIATED', 'WITHDRAWAL', withdrawalOrderData.metadata.bank_account, withdrawalOrderData.metadata.bank_name, withdrawalOrderData.metadata.account_holder], function(err) {
                                         if (err) {
-                                            console.error('Database error:', err.message);
-                                            return res.status(500).json({ error: 'Database error' });
+                                            console.error('JusPay withdrawal order creation failed:', err.message);
+                                            // Continue with withdrawal completion even if JusPay tracking fails
+                                        } else {
+                                            console.log('JusPay withdrawal order created:', withdrawalOrderData.order_id);
                                         }
                                         
-                                        res.json({ 
-                                            success: true, 
-                                            message: `Successfully withdrew $${amount} to ${user.bank_name} account`,
-                                            transaction_id: transactionId,
-                                            wallet_balance: updatedUser.wallet_balance,
-                                            glo_coin_balance: updatedUser.glo_coin_balance,
-                                            total_withdrawn: updatedUser.total_withdrawn
-                                        });
+                                        db.run('COMMIT');
+                                        
+                                        // Get updated balances
+                                        db.get('SELECT wallet_balance, glo_coin_balance, total_withdrawn FROM users WHERE id = ?', 
+                                            [userId], (err, updatedUser) => {
+                                                if (err) {
+                                                    console.error('Database error:', err.message);
+                                                    return res.status(500).json({ error: 'Database error' });
+                                                }
+                                                
+                                                res.json({ 
+                                                    success: true, 
+                                                    message: `Successfully withdrew $${amount} to ${user.bank_name} account`,
+                                                    transaction_id: transactionId,
+                                                    juspay_order_id: withdrawalOrderData.order_id,
+                                                    wallet_balance: updatedUser.wallet_balance,
+                                                    glo_coin_balance: updatedUser.glo_coin_balance,
+                                                    total_withdrawn: updatedUser.total_withdrawn
+                                                });
+                                            });
                                     });
                             });
                     });
@@ -639,10 +717,14 @@ app.post('/payment/create-order', async (req, res) => {
         // Create payment session with JusPay
         const paymentSession = await jusPayService.createPaymentSession(orderData);
         
+        // Send order data to JusPay dashboard via webhook
+        const webhookResult = await webhookSender.sendOrderCreated(orderData);
+        console.log('JusPay dashboard webhook sent:', webhookResult);
+        
         // Store order in database
-        db.run(`INSERT INTO orders (user_id, order_id, session_id, amount, currency, status, juspay_response) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)`, 
-            [userId, orderData.order_id, paymentSession.session_id, amount, currency, 'PENDING', JSON.stringify(paymentSession)], 
+        db.run(`INSERT INTO orders (user_id, order_id, session_id, amount, currency, status, customer_id, juspay_response) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, 
+            [userId, orderData.order_id, paymentSession.session_id, amount, currency, 'PENDING', orderData.customer_id, JSON.stringify(paymentSession)], 
             function(err) {
                 if (err) {
                     console.error('Database error:', err.message);
@@ -652,12 +734,14 @@ app.post('/payment/create-order', async (req, res) => {
                 console.log('Order created:', orderData.order_id);
                 res.json({
                     success: true,
-                    order_id: orderData.order_id,
-                    session_id: paymentSession.session_id,
+                    order: {
+                        order_id: orderData.order_id,
+                        session_id: paymentSession.session_id,
+                        amount: amount,
+                        currency: currency
+                    },
                     payment_page_url: paymentSession.payment_page_url,
-                    sdk_payload: paymentSession.sdk_payload,
-                    amount: amount,
-                    currency: currency
+                    sdk_payload: paymentSession.sdk_payload
                 });
             });
     } catch (error) {
@@ -694,8 +778,16 @@ app.post('/payment/complete', async (req, res) => {
                 // Process mock payment
                 const paymentResult = await jusPayService.processMockPayment(order_id, success);
                 
-                // Update order status
+                // Update order status in JusPay dashboard via webhook
                 const newStatus = success ? 'CHARGED' : 'FAILED';
+                const webhookStatusResult = await webhookSender.sendPaymentStatusUpdate(order_id, newStatus, {
+                    transaction_id: paymentResult.transaction_id,
+                    payment_method: paymentResult.payment_method,
+                    gateway_reference_id: paymentResult.gateway_reference_id
+                });
+                console.log('JusPay status webhook sent:', webhookStatusResult);
+                
+                // Update order status in local database
                 db.run(`UPDATE orders SET status = ?, transaction_id = ?, gateway_reference_id = ?, 
                         juspay_response = ?, updated_at = CURRENT_TIMESTAMP WHERE order_id = ?`, 
                     [newStatus, paymentResult.transaction_id, paymentResult.gateway_reference_id, 
