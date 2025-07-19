@@ -12,16 +12,23 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background: #f8f9fa;
-            min-height: 100vh;
-        }
-
-        .header {
+            font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }        
+        
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            padding: 1rem 0;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem 0;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .header-content {
@@ -34,7 +41,13 @@
         }
 
         .logo h1 {
-            font-size: 1.8rem;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #fff, #e0e7ff, #c7d2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
         }
 
         .nav-links {
@@ -66,17 +79,22 @@
         }
 
         .logout-btn {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
         }
 
         .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
 
         .container {
@@ -86,51 +104,118 @@
         }
 
         .welcome-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             margin-bottom: 2rem;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .welcome-card:hover::before {
+            left: 100%;
+        }
+
+        .welcome-card h2 {
+            color: #4c1d95;
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .welcome-card p {
+            color: #6b7280;
+            font-size: 1.1rem;
         }
 
         .balance-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .balance-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .balance-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 1.5rem;
-            border-radius: 10px;
+            padding: 2rem;
+            border-radius: 15px;
             text-align: center;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+            opacity: 0;
+        }
+
+        .balance-card:hover::before {
+            opacity: 1;
+            transform: rotate(45deg) translate(50%, 50%);
+        }
+
+        .balance-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
         }
 
         .balance-card.secondary {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+        }
+
+        .balance-card.secondary:hover {
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.4);
         }
 
         .balance-card h3 {
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
             opacity: 0.9;
+            font-weight: 600;
         }
 
         .balance-card .amount {
-            font-size: 2rem;
-            font-weight: bold;
+            font-size: 2.5rem;
+            font-weight: 700;
             margin-bottom: 0.5rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
 
         .bank-section {
@@ -173,65 +258,127 @@
         }
 
         .action-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e0e0e0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .action-card:hover::before {
+            left: 100%;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
         }
 
         .action-card h3 {
-            color: #333;
-            margin-bottom: 1rem;
+            color: #4c1d95;
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.8rem;
+            font-size: 1.4rem;
+            font-weight: 700;
         }
 
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
-            color: #333;
-            font-weight: 500;
+            margin-bottom: 0.8rem;
+            color: #374151;
+            font-weight: 600;
+            font-size: 1rem;
         }
 
         .form-group input {
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
             font-size: 1rem;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
         }
 
         .form-group input:focus {
             outline: none;
             border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 1);
         }
 
         .btn {
             width: 100%;
-            padding: 0.75rem;
+            padding: 1rem 1.5rem;
             border: none;
-            border-radius: 5px;
-            font-size: 1rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
             cursor: pointer;
-            transition: opacity 0.3s;
-            font-weight: 500;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
 
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
 
         .btn-success {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
         }
 
         .btn-danger {
@@ -318,6 +465,24 @@
 
         .payment-info strong {
             color: #333;
+        }
+
+        /* Gateway Badge Styles */
+        .gateway-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        .gateway-juspay {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .gateway-razorpay {
+            background: linear-gradient(135deg, #528ff0 0%, #3b82f6 100%);
         }
 
         .payment-simulation p {
@@ -436,6 +601,76 @@
                 padding: 1rem;
             }
         }
+        
+        /* Gateway Indicator Styles */
+        .current-gateway-indicator {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            animation: glow 3s infinite alternate;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .current-gateway-indicator::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.8s;
+        }
+
+        .current-gateway-indicator:hover::before {
+            left: 100%;
+        }
+        
+        .gateway-juspay {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .gateway-razorpay {
+            background: linear-gradient(135deg, #3395ff, #1976d2);
+            color: white;
+            box-shadow: 0 8px 25px rgba(51, 149, 255, 0.4);
+        }
+        
+        @keyframes glow {
+            0% { 
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                transform: scale(1);
+            }
+            100% { 
+                box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+                transform: scale(1.02);
+            }
+        }
+
+        .gateway-razorpay {
+            animation-name: glowRazorpay;
+        }
+
+        @keyframes glowRazorpay {
+            0% { 
+                box-shadow: 0 8px 25px rgba(51, 149, 255, 0.4);
+                transform: scale(1);
+            }
+            100% { 
+                box-shadow: 0 12px 35px rgba(51, 149, 255, 0.6);
+                transform: scale(1.02);
+            }
+        }
     </style>
 </head>
 <body>
@@ -523,16 +758,19 @@
         </div>
 
         <div class="wallet-actions">
-            <!-- JusPay Payment Integration -->
+            <!-- Payment Gateway Integration -->
             <div class="action-card" style="border: 2px solid #667eea;">
-                <h3>💳 Add Money via JusPay</h3>
-                <p style="color: #666; margin-bottom: 1rem;">Add funds to your wallet using JusPay sandbox payment gateway</p>
+                <h3>💳 Add Money via Payment Gateway</h3>
+                <div class="current-gateway-indicator" id="gatewayIndicator">
+                    <span id="currentGatewayName">Loading...</span>
+                </div>
+                <p style="color: #666; margin-bottom: 1rem;">Add funds to your wallet using secure payment gateway</p>
                 <form id="juspayPaymentForm">
                     <div class="form-group">
                         <label for="juspayAmount">Amount (₹)</label>
                         <input type="number" id="juspayAmount" name="amount" min="1" step="0.01" required>
                     </div>
-                    <button type="submit" class="btn btn-primary" id="juspayBtn">Pay with JusPay</button>
+                    <button type="submit" class="btn btn-primary" id="juspayBtn">Create Payment Order</button>
                 </form>
                 <div style="margin-top: 1rem;">
                     <button type="button" class="btn btn-info" id="viewOrdersBtn">View Order History</button>
@@ -597,12 +835,13 @@
         <div id="paymentModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>JusPay Payment</h3>
+                    <h3>Payment Gateway</h3>
                     <span class="close" id="closePaymentModal">&times;</span>
                 </div>
                 <div id="paymentContent">
                     <div class="payment-info">
                         <h4>Payment Details</h4>
+                        <p><strong>Gateway:</strong> <span id="paymentGateway" class="gateway-badge">Loading...</span></p>
                         <p><strong>Order ID:</strong> <span id="paymentOrderId">-</span></p>
                         <p><strong>Amount:</strong> ₹<span id="paymentAmount">0</span></p>
                         <p><strong>Status:</strong> <span id="paymentStatus">Processing...</span></p>
@@ -655,6 +894,9 @@
                     currentUser = await response.json();
                     document.getElementById('userWelcome').textContent = `Welcome, ${currentUser.username}!`;
                     updateBalanceDisplay();
+                    
+                    // Load current gateway status
+                    await loadCurrentGateway();
                 } else {
                     // User not authenticated, redirect to login
                     window.location.href = '/login';
@@ -947,6 +1189,39 @@
             document.getElementById('errorMessage').style.display = 'none';
         }
 
+        // Load current gateway info
+        async function loadCurrentGateway() {
+            try {
+                const response = await fetch('/admin/status');
+                if (response.ok) {
+                    const status = await response.json();
+                    updateGatewayIndicator(status.activeGateway);
+                } else {
+                    console.error('Failed to load gateway status');
+                    updateGatewayIndicator('unknown');
+                }
+            } catch (error) {
+                console.error('Error loading gateway status:', error);
+                updateGatewayIndicator('unknown');
+            }
+        }
+
+        function updateGatewayIndicator(gateway) {
+            const indicator = document.getElementById('gatewayIndicator');
+            const nameElement = document.getElementById('currentGatewayName');
+            
+            if (gateway === 'juspay') {
+                indicator.className = 'current-gateway-indicator gateway-juspay';
+                nameElement.textContent = '💜 Powered by JusPay';
+            } else if (gateway === 'razorpay') {
+                indicator.className = 'current-gateway-indicator gateway-razorpay';
+                nameElement.textContent = '💙 Powered by Razorpay';
+            } else {
+                indicator.className = 'current-gateway-indicator';
+                nameElement.textContent = '⚡ Payment Gateway';
+            }
+        }
+
         function hideMessages() {
             document.getElementById('errorMessage').style.display = 'none';
             document.getElementById('successMessage').style.display = 'none';
@@ -980,6 +1255,6 @@
     </script>
     
     <!-- JusPay Integration Script -->
-    <script src="/juspay-integration.js"></script>
+    <script src="/payment-integration.js"></script>
 </body>
 </html>

@@ -5,54 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializePaymentIntegration() {
     // Modal elements
-    const payme                } else {
-                    alert('Error: ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error simulating failure:', error);
-                alert('Error simulating payment failure');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Simulate Failed Payment';
-            }
-        });
-    }
-}
-
-// Update simulation buttons based on active gateway
-function updateSimulationButtons(gateway) {
-    const successBtn = document.getElementById('simulateSuccess');
-    const failureBtn = document.getElementById('simulateFailure');
-    
-    if (gateway === 'razorpay') {
-        if (successBtn) successBtn.textContent = 'Simulate Razorpay Success';
-        if (failureBtn) failureBtn.textContent = 'Simulate Razorpay Failure';
-    } else if (gateway === 'juspay') {
-        if (successBtn) successBtn.textContent = 'Simulate JusPay Success';
-        if (failureBtn) failureBtn.textContent = 'Simulate JusPay Failure';
-    } else {
-        if (successBtn) successBtn.textContent = 'Simulate Success';
-        if (failureBtn) failureBtn.textContent = 'Simulate Failure';
-    }
-}
-
-// Handle Razorpay-specific payment flows (if needed in future)
-function handleRazorpayPayment(options) {
-    if (typeof Razorpay !== 'undefined') {
-        var rzp = new Razorpay(options);
-        rzp.open();
-    } else {
-        console.log('Razorpay SDK not loaded, using simulation');
-        // Fall back to simulation
-    }
-}
-
-// Handle JusPay-specific payment flows (if needed in future)
-function handleJusPayPayment(options) {
-    // JusPay SDK integration can be added here
-    console.log('JusPay payment with options:', options);
-    // Fall back to simulation for now
-}ument.getElementById('paymentModal');
+    const paymentModal = document.getElementById('paymentModal');
     const orderModal = document.getElementById('orderModal');
     const closePaymentModal = document.getElementById('closePaymentModal');
     const closeOrderModal = document.getElementById('closeOrderModal');
@@ -89,13 +42,22 @@ function handleJusPayPayment(options) {
                         data.orders.forEach(order => {
                             const item = document.createElement('div');
                             item.className = 'transaction-item';
+                            
+                            // Determine gateway from order ID
+                            let gateway = 'Unknown';
+                            if (order.order_id.startsWith('JUSPAY_')) {
+                                gateway = 'JusPay';
+                            } else if (order.order_id.startsWith('RAZORPAY_')) {
+                                gateway = 'Razorpay';
+                            }
+                            
                             item.innerHTML = `
                                 <div class="transaction-details">
                                     <h4>Order #${order.order_id}</h4>
                                     <p>Amount: ₹${order.amount}</p>
+                                    <p>Gateway: <strong>${gateway}</strong></p>
                                     <p>Date: ${new Date(order.created_at).toLocaleString()}</p>
                                     <p>Status: <span class="status-${order.status}">${order.status}</span></p>
-                                    <p>Payment ID: ${order.payment_id || 'N/A'}</p>
                                 </div>
                             `;
                             historyDiv.appendChild(item);
@@ -104,16 +66,16 @@ function handleJusPayPayment(options) {
                     
                     orderModal.style.display = 'block';
                 } else {
-                    alert('Error: ' + data.message);
+                    alert('Error loading order history');
                 }
             } catch (error) {
-                console.error('Error fetching order history:', error);
-                alert('Error fetching order history');
+                console.error('Error loading order history:', error);
+                alert('Error loading order history');
             }
         };
     }
     
-    // JusPay Payment Form
+    // Payment form handling
     const juspayForm = document.getElementById('juspayPaymentForm');
     if (juspayForm) {
         juspayForm.addEventListener('submit', async (e) => {
@@ -177,7 +139,7 @@ function handleJusPayPayment(options) {
                 alert('Error creating order');
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Pay with JusPay';
+                btn.textContent = 'Create Payment Order';
             }
         });
     }
@@ -202,7 +164,8 @@ function handleJusPayPayment(options) {
                     },
                     body: JSON.stringify({
                         order_id: window.currentOrderId,
-                        status: 'success'
+                        status: 'success',
+                        gateway: window.currentGateway
                     })
                 });
                 
@@ -211,28 +174,28 @@ function handleJusPayPayment(options) {
                 if (data.success) {
                     document.getElementById('paymentStatus').textContent = 'Success';
                     document.getElementById('paymentStatus').className = 'status-success';
-                    alert('Payment successful! Your wallet has been credited.');
-                    
-                    // Update balance if function exists
-                    if (typeof updateBalanceDisplay === 'function') {
-                        updateBalanceDisplay();
-                    }
+                    alert('Payment successful! Glo Coins added to your wallet.');
                     
                     setTimeout(() => {
                         paymentModal.style.display = 'none';
                         window.currentOrderId = null;
+                        window.currentGateway = null;
+                        // Refresh user balance
+                        if (typeof loadUserBalance === 'function') {
+                            loadUserBalance();
+                        }
                     }, 2000);
                 } else {
                     alert('Error: ' + data.message);
                 }
             } catch (error) {
-                console.error('Error completing payment:', error);
-                alert('Error completing payment');
+                console.error('Error simulating success:', error);
+                alert('Error simulating payment success');
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Simulate Success';
+                updateSimulationButtons(window.currentGateway);
             }
-        };
+        });
     }
     
     if (simulateFailureBtn) {
@@ -251,7 +214,8 @@ function handleJusPayPayment(options) {
                     },
                     body: JSON.stringify({
                         order_id: window.currentOrderId,
-                        status: 'failed'
+                        status: 'failed',
+                        gateway: window.currentGateway
                     })
                 });
                 
@@ -265,17 +229,53 @@ function handleJusPayPayment(options) {
                     setTimeout(() => {
                         paymentModal.style.display = 'none';
                         window.currentOrderId = null;
+                        window.currentGateway = null;
                     }, 2000);
                 } else {
                     alert('Error: ' + data.message);
                 }
             } catch (error) {
-                console.error('Error completing payment:', error);
-                alert('Error completing payment');
+                console.error('Error simulating failure:', error);
+                alert('Error simulating payment failure');
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Simulate Failure';
+                updateSimulationButtons(window.currentGateway);
             }
-        };
+        });
     }
+}
+
+// Update simulation buttons based on active gateway
+function updateSimulationButtons(gateway) {
+    const successBtn = document.getElementById('simulateSuccess');
+    const failureBtn = document.getElementById('simulateFailure');
+    
+    if (gateway === 'razorpay') {
+        if (successBtn) successBtn.textContent = 'Simulate Razorpay Success';
+        if (failureBtn) failureBtn.textContent = 'Simulate Razorpay Failure';
+    } else if (gateway === 'juspay') {
+        if (successBtn) successBtn.textContent = 'Simulate JusPay Success';
+        if (failureBtn) failureBtn.textContent = 'Simulate JusPay Failure';
+    } else {
+        if (successBtn) successBtn.textContent = 'Simulate Success';
+        if (failureBtn) failureBtn.textContent = 'Simulate Failure';
+    }
+}
+
+// Handle Razorpay-specific payment flows (if needed in future)
+function handleRazorpayPayment(options) {
+    if (typeof Razorpay !== 'undefined') {
+        var rzp = new Razorpay(options);
+        rzp.open();
+    } else {
+        console.log('Razorpay SDK not loaded, using simulation');
+        // Fall back to simulation
+    }
+}
+
+// Handle JusPay-specific payment flows (if needed in future)
+function handleJusPayPayment(options) {
+    // JusPay SDK integration can be added here
+    console.log('JusPay payment with options:', options);
+    // Fall back to simulation for now
 }

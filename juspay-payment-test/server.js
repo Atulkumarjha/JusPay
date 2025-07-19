@@ -4,14 +4,14 @@ const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const path = require('path');
-const JusPayService = require('./services/JusPayService');
+const PaymentGatewayManager = require('./services/PaymentGatewayManager');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Initialize JusPay service
-const jusPayService = new JusPayService();
+// Initialize Payment Gateway Manager (handles both JusPay and Razorpay)
+const paymentManager = new PaymentGatewayManager();
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -50,6 +50,7 @@ const db = new sqlite3.Database('./users.db', (err) => {
             bank_routing_number TEXT,
             account_holder_name TEXT,
             total_withdrawn REAL DEFAULT 0.0,
+            role TEXT DEFAULT 'user',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`, (err) => {
             if (err) {
@@ -67,6 +68,12 @@ const db = new sqlite3.Database('./users.db', (err) => {
                 db.run(`ALTER TABLE users ADD COLUMN glo_coin_balance REAL DEFAULT 0.0`, (err) => {
                     if (err && !err.message.includes('duplicate column')) {
                         console.error('Error adding glo_coin_balance column:', err.message);
+                    }
+                });
+                
+                db.run(`ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'`, (err) => {
+                    if (err && !err.message.includes('duplicate column')) {
+                        console.error('Error adding role column:', err.message);
                     }
                 });
                 
@@ -97,6 +104,38 @@ const db = new sqlite3.Database('./users.db', (err) => {
                 db.run(`ALTER TABLE users ADD COLUMN total_withdrawn REAL DEFAULT 0.0`, (err) => {
                     if (err && !err.message.includes('duplicate column')) {
                         console.error('Error adding total_withdrawn column:', err.message);
+                    }
+                });
+                
+                // Create super admin user if it doesn't exist
+                const superAdminUsername = 'superadmin';
+                const superAdminPassword = 'SuperAdmin@2025!';
+                
+                db.get('SELECT username FROM users WHERE username = ?', [superAdminUsername], (err, row) => {
+                    if (err) {
+                        console.error('Error checking super admin user:', err.message);
+                    } else if (!row) {
+                        // Super admin user doesn't exist, create it
+                        bcrypt.hash(superAdminPassword, 10, (err, hashedPassword) => {
+                            if (err) {
+                                console.error('Error hashing super admin password:', err.message);
+                            } else {
+                                db.run('INSERT INTO users (username, email, password, role, wallet_balance, glo_coin_balance) VALUES (?, ?, ?, ?, ?, ?)', 
+                                    [superAdminUsername, 'superadmin@glocoin.com', hashedPassword, 'superadmin', 1000000, 50000], 
+                                    (err) => {
+                                        if (err) {
+                                            console.error('Error creating super admin user:', err.message);
+                                        } else {
+                                            console.log('🔐 Super Admin user created successfully');
+                                            console.log('📧 Username: superadmin');
+                                            console.log('🔑 Password: SuperAdmin@2025!');
+                                            console.log('⚠️  Please change the password after first login');
+                                        }
+                                    });
+                            }
+                        });
+                    } else {
+                        console.log('Super admin user already exists');
                     }
                 });
                 
@@ -212,7 +251,27 @@ const db = new sqlite3.Database('./users.db', (err) => {
                     }
                 });
             }
-        });// Routes
+        });
+
+// Authentication middleware
+function requireAuth(req, res, next) {
+    if (req.session.user) {
+        next();
+    } else {
+        res.status(401).json({ error: 'Authentication required' });
+    }
+}
+
+// Super admin middleware
+function requireSuperAdmin(req, res, next) {
+    if (req.session.user && req.session.user.role === 'superadmin') {
+        next();
+    } else {
+        res.status(403).json({ error: 'Super admin access required' });
+    }
+}
+
+// Routes
 app.get('/', (req, res) => {
     if (req.session.user) {
         res.sendFile(path.join(__dirname, 'public', 'glo-coin.html'));
@@ -273,9 +332,12 @@ app.post('/login', (req, res) => {
                 req.session.user = {
                     id: user.id,
                     username: user.username,
-                    email: user.email
+                    email: user.email,
+                    role: user.role || 'user'
                 };
-                res.json({ success: true, message: 'Login successful', redirectTo: '/glo-coin' });
+                
+                const redirectTo = user.role === 'superadmin' ? '/admin' : '/glo-coin';
+                res.json({ success: true, message: 'Login successful', redirectTo: redirectTo });
             } else {
                 res.status(401).json({ error: 'Invalid username or password' });
             }
@@ -709,11 +771,11 @@ app.post('/payment/create-order', async (req, res) => {
     const userId = req.session.user.id;
 
     try {
-        // Generate mock order data
-        const orderData = jusPayService.generateMockOrder(amount, currency);
+        // Generate order data using the payment manager
+        const orderData = paymentManager.generateOrderData(amount, currency);
         
-        // Create payment session with JusPay
-        const paymentSession = await jusPayService.createPaymentSession(orderData);
+        // Create payment session with the active gateway (JusPay or Razorpay)
+        const paymentSession = await paymentManager.createPaymentSession(orderData);
         
         // Store order in database
         db.run(`INSERT INTO orders (user_id, order_id, session_id, amount, currency, status, customer_id, juspay_response) 
@@ -725,9 +787,11 @@ app.post('/payment/create-order', async (req, res) => {
                     return res.status(500).json({ error: 'Database error' });
                 }
                 
-                console.log('Order created:', orderData.order_id);
+                console.log('Order created with gateway:', paymentSession.gateway, 'Order ID:', orderData.order_id);
                 res.json({
                     success: true,
+                    gateway: paymentSession.gateway,
+                    gateway_name: paymentSession.gateway_display_name,
                     order: {
                         order_id: orderData.order_id,
                         session_id: paymentSession.session_id,
@@ -744,13 +808,14 @@ app.post('/payment/create-order', async (req, res) => {
     }
 });
 
-// Process mock payment completion
+// Process payment completion
 app.post('/payment/complete', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: 'Not authenticated' });
     }
 
-    const { order_id, success = true } = req.body;
+    const { order_id, status, gateway } = req.body;
+    const success = status === 'success';
     
     if (!order_id) {
         return res.status(400).json({ error: 'Order ID is required' });
@@ -769,11 +834,17 @@ app.post('/payment/complete', async (req, res) => {
                     return res.status(404).json({ error: 'Order not found' });
                 }
 
-                // Process mock payment
-                const paymentResult = await jusPayService.processMockPayment(order_id, success);
+                // Process payment using the active gateway
+                const paymentData = {
+                    status: status,
+                    amount: order.amount,
+                    gateway: gateway || paymentManager.getActiveGatewayName()
+                };
                 
-                // Update order status in JusPay dashboard
-                const newStatus = success ? 'CHARGED' : 'FAILED';
+                const paymentResult = await paymentManager.processPayment(order_id, paymentData);
+                
+                // Update order status
+                const newStatus = success ? 'SUCCESS' : 'FAILED';
                 
                 // Update order status in local database
                 db.run(`UPDATE orders SET status = ?, transaction_id = ?, gateway_reference_id = ?, 
@@ -794,14 +865,15 @@ app.post('/payment/complete', async (req, res) => {
                                         return res.status(500).json({ error: 'Database error' });
                                     }
                                     
-                                    console.log('Payment completed successfully:', order_id);
+                                    console.log(`Payment completed successfully via ${paymentResult.gateway}:`, order_id);
                                     res.json({
                                         success: true,
-                                        message: `Payment of ₹${order.amount} completed successfully`,
+                                        message: `Payment of ₹${order.amount} completed successfully via ${paymentResult.gateway}`,
                                         order_id: order_id,
                                         transaction_id: paymentResult.transaction_id,
                                         amount: order.amount,
-                                        status: newStatus
+                                        status: newStatus,
+                                        gateway: paymentResult.gateway
                                     });
                                 });
                         } else {
@@ -970,6 +1042,156 @@ app.post('/webhook/juspay', (req, res) => {
     // Forward to main webhook handler
     req.url = '/api/payment/callback';
     app.handle(req, res);
+});
+
+// Super Admin Routes
+// ==================
+
+// Admin dashboard route
+app.get('/admin', requireSuperAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Get payment gateway status
+app.get('/api/admin/payment-gateways', requireSuperAdmin, async (req, res) => {
+    try {
+        const gatewayInfo = paymentManager.getAvailableGateways();
+        const healthCheck = await paymentManager.healthCheck();
+        
+        res.json({
+            success: true,
+            current_gateway: gatewayInfo.current,
+            gateways: gatewayInfo.available,
+            health: healthCheck
+        });
+    } catch (error) {
+        console.error('Error getting gateway status:', error.message);
+        res.status(500).json({ error: 'Failed to get gateway status' });
+    }
+});
+
+// Switch payment gateway
+app.post('/api/admin/switch-gateway', requireSuperAdmin, (req, res) => {
+    try {
+        const { gateway } = req.body;
+        
+        if (!gateway) {
+            return res.status(400).json({ error: 'Gateway name is required' });
+        }
+        
+        const result = paymentManager.switchGateway(gateway);
+        
+        // Log the gateway switch
+        console.log(`🔄 Payment gateway switched by ${req.session.user.username} from ${result.previous} to ${result.current}`);
+        
+        res.json({
+            success: true,
+            message: `Payment gateway switched to ${gateway}`,
+            previous: result.previous,
+            current: result.current,
+            timestamp: result.timestamp
+        });
+    } catch (error) {
+        console.error('Error switching gateway:', error.message);
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Get gateway configuration for frontend
+app.get('/api/admin/gateway-config', requireSuperAdmin, (req, res) => {
+    try {
+        const config = paymentManager.getGatewayConfig();
+        res.json({
+            success: true,
+            config: config
+        });
+    } catch (error) {
+        console.error('Error getting gateway config:', error.message);
+        res.status(500).json({ error: 'Failed to get gateway configuration' });
+    }
+});
+
+// Get all users (super admin only)
+app.get('/api/admin/users', requireSuperAdmin, (req, res) => {
+    db.all('SELECT id, username, email, role, wallet_balance, glo_coin_balance, total_withdrawn, created_at FROM users ORDER BY created_at DESC', (err, users) => {
+        if (err) {
+            console.error('Database error:', err.message);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        
+        res.json({
+            success: true,
+            users: users
+        });
+    });
+});
+
+// Get all orders with gateway information (super admin only)
+app.get('/api/admin/orders', requireSuperAdmin, (req, res) => {
+    db.all(`SELECT o.*, u.username 
+            FROM orders o 
+            LEFT JOIN users u ON o.user_id = u.id 
+            ORDER BY o.created_at DESC 
+            LIMIT 100`, (err, orders) => {
+        if (err) {
+            console.error('Database error:', err.message);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        
+        // Add gateway information to orders
+        const ordersWithGateway = orders.map(order => {
+            let gateway = 'unknown';
+            if (order.order_id.startsWith('JUSPAY_')) {
+                gateway = 'juspay';
+            } else if (order.order_id.startsWith('RAZORPAY_')) {
+                gateway = 'razorpay';
+            }
+            
+            return {
+                ...order,
+                gateway: gateway,
+                gateway_display: gateway.charAt(0).toUpperCase() + gateway.slice(1)
+            };
+        });
+        
+        res.json({
+            success: true,
+            orders: ordersWithGateway
+        });
+    });
+});
+
+// Get platform statistics (super admin only)
+app.get('/api/admin/stats', requireSuperAdmin, (req, res) => {
+    const queries = [
+        'SELECT COUNT(*) as total_users FROM users WHERE role != "superadmin"',
+        'SELECT COUNT(*) as total_orders FROM orders',
+        'SELECT SUM(amount) as total_revenue FROM orders WHERE status = "SUCCESS"',
+        'SELECT SUM(wallet_balance) as total_wallet_balance FROM users',
+        'SELECT SUM(glo_coin_balance) as total_glo_coins FROM users'
+    ];
+    
+    Promise.all(queries.map(query => new Promise((resolve, reject) => {
+        db.get(query, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
+    }))).then(results => {
+        res.json({
+            success: true,
+            stats: {
+                total_users: results[0].total_users,
+                total_orders: results[1].total_orders,
+                total_revenue: (results[2].total_revenue || 0) / 100, // Convert back to main currency unit
+                total_wallet_balance: results[3].total_wallet_balance || 0,
+                total_glo_coins: results[4].total_glo_coins || 0,
+                current_gateway: paymentManager.getActiveGatewayName()
+            }
+        });
+    }).catch(error => {
+        console.error('Error getting stats:', error.message);
+        res.status(500).json({ error: 'Failed to get platform statistics' });
+    });
 });
 
 // Start server
