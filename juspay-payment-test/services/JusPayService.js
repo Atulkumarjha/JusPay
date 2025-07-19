@@ -44,7 +44,7 @@ class JusPayService {
             return_url: process.env.WEBHOOK_URL || 'https://example.com/return',
             description: `Glo Coin Purchase - ${amount} ${currency}`,
             metadata: {
-                source: 'glo-coin-platform',
+                source: 'payment-gateway-platform',
                 version: '1.0.0',
                 type: 'payment'
             }

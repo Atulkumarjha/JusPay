@@ -274,7 +274,7 @@ function requireSuperAdmin(req, res, next) {
 // Routes
 app.get('/', (req, res) => {
     if (req.session.user) {
-        res.sendFile(path.join(__dirname, 'public', 'glo-coin.html'));
+        res.redirect('/dashboard');
     } else {
         res.sendFile(path.join(__dirname, 'public', 'login.html'));
     }
@@ -296,12 +296,17 @@ app.get('/dashboard', (req, res) => {
     }
 });
 
-app.get('/glo-coin', (req, res) => {
+app.get('/dashboard', (req, res) => {
     if (req.session.user) {
         res.sendFile(path.join(__dirname, 'public', 'glo-coin.html'));
     } else {
         res.redirect('/login');
     }
+});
+
+// Keep the old route for backwards compatibility
+app.get('/glo-coin', (req, res) => {
+    res.redirect('/dashboard');
 });
 
 // Login endpoint
@@ -336,7 +341,7 @@ app.post('/login', (req, res) => {
                     role: user.role || 'user'
                 };
                 
-                const redirectTo = user.role === 'superadmin' ? '/admin' : '/glo-coin';
+                const redirectTo = user.role === 'superadmin' ? '/admin' : '/dashboard';
                 res.json({ success: true, message: 'Login successful', redirectTo: redirectTo });
             } else {
                 res.status(401).json({ error: 'Invalid username or password' });
@@ -679,7 +684,7 @@ app.post('/wallet/withdraw', async (req, res) => {
                                     description: `Withdrawal to ${user.bank_name} - ${user.account_holder_name}`,
                                     return_url: `${process.env.WEBHOOK_URL}/withdrawal/success`,
                                     metadata: {
-                                        source: 'glo-coin-platform',
+                                        source: 'payment-gateway-platform',
                                         type: 'WITHDRAWAL',
                                         bank_name: user.bank_name,
                                         account_holder: user.account_holder_name,

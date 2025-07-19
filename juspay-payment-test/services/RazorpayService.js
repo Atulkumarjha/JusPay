@@ -39,7 +39,7 @@ class RazorpayService {
             currency: currency,
             receipt: orderId,
             notes: {
-                source: 'glo-coin-platform',
+                source: 'payment-gateway-platform',
                 version: '1.0.0',
                 type: 'payment',
                 customer_email: process.env.MOCK_CUSTOMER_EMAIL || 'test@example.com',

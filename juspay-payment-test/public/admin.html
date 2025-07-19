@@ -527,12 +527,12 @@
                 <div class="gateway-toggle-section">
                     <h3>Quick Gateway Switch</h3>
                     <div class="toggle-container">
-                        <span class="toggle-label">JusPay</span>
+                        <span class="toggle-label">Gateway A</span>
                         <label class="toggle-switch">
                             <input type="checkbox" id="gatewayToggle">
                             <span class="toggle-slider"></span>
                         </label>
-                        <span class="toggle-label">Razorpay</span>
+                        <span class="toggle-label">Gateway B</span>
                     </div>
                     <div class="current-gateway-status">
                         <span id="currentGatewayStatus">Loading...</span>
@@ -655,11 +655,11 @@
                     
                     if (currentGateway === 'razorpay') {
                         toggle.checked = true;
-                        statusElement.textContent = '🔵 Razorpay Active';
+                        statusElement.textContent = '🔵 Gateway B Active';
                         statusElement.className = 'current-gateway-status razorpay';
                     } else {
                         toggle.checked = false;
-                        statusElement.textContent = '🟣 JusPay Active';
+                        statusElement.textContent = '🟣 Gateway A Active';
                         statusElement.className = 'current-gateway-status';
                     }
                     
@@ -723,14 +723,15 @@
                     
                     // Update status display
                     if (newGateway === 'razorpay') {
-                        statusElement.textContent = '🔵 Razorpay Active';
+                        statusElement.textContent = '🔵 Gateway B Active';
                         statusElement.className = 'current-gateway-status razorpay';
                     } else {
-                        statusElement.textContent = '🟣 JusPay Active';
+                        statusElement.textContent = '🟣 Gateway A Active';
                         statusElement.className = 'current-gateway-status';
                     }
                     
-                    showAlert(`✅ Gateway switched to ${newGateway.charAt(0).toUpperCase() + newGateway.slice(1)}!`, 'success');
+                    const gatewayDisplayName = newGateway === 'razorpay' ? 'Gateway B' : 'Gateway A';
+                    showAlert(`✅ Gateway switched to ${gatewayDisplayName}!`, 'success');
                     
                     // Reload stats and gateway details
                     loadPlatformStats();

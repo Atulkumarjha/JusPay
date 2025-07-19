@@ -733,7 +733,7 @@
                 <h1>💰 Payment Gateway Dashboard</h1>
             </div>
             <div class="nav-links">
-                <a href="/glo-coin" class="active">Payment Dashboard</a>
+                <a href="/dashboard" class="active">Payment Dashboard</a>
                 <a href="/dashboard">Transaction History</a>
             </div>
             <div class="user-info">
@@ -1265,10 +1265,10 @@
             
             if (gateway === 'juspay') {
                 indicator.className = 'current-gateway-indicator gateway-juspay';
-                nameElement.textContent = '💜 Powered by JusPay';
+                nameElement.textContent = '💜 Gateway A (Primary)';
             } else if (gateway === 'razorpay') {
                 indicator.className = 'current-gateway-indicator gateway-razorpay';
-                nameElement.textContent = '💙 Powered by Razorpay';
+                nameElement.textContent = '💙 Gateway B (Secondary)';
             } else {
                 indicator.className = 'current-gateway-indicator';
                 nameElement.textContent = '⚡ Payment Gateway';
