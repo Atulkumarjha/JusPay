@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JusPay - Glo Coin</title>
+    <title>Payment Gateway Dashboard - Dual Gateway Platform</title>
     <style>
         * {
             margin: 0;
@@ -462,7 +462,7 @@
             color: #333;
         }
 
-        /* JusPay Payment Modal Styles */
+        /* Payment Gateway Modal Styles */
         .payment-info, .payment-simulation {
             padding: 1.5rem;
             border-bottom: 1px solid #eee;
@@ -730,11 +730,11 @@
     <header class="header">
         <div class="header-content">
             <div class="logo">
-                <h1>JusPay - Glo Coin</h1>
+                <h1>💰 Payment Gateway Dashboard</h1>
             </div>
             <div class="nav-links">
-                <a href="/glo-coin" class="active">Glo Coin</a>
-                <a href="/dashboard">Dashboard</a>
+                <a href="/glo-coin" class="active">Payment Dashboard</a>
+                <a href="/dashboard">Transaction History</a>
             </div>
             <div class="user-info">
                 <span id="userWelcome">Welcome, User!</span>
@@ -745,10 +745,10 @@
 
     <div class="container">
         <div class="welcome-card">
-            <div class="glo-coin-logo">🪙</div>
-            <h2>Glo Coin Wallet</h2>
+            <div class="glo-coin-logo">💰</div>
+            <h2>Dual Payment Gateway Dashboard</h2>
             <p>
-                Manage your wallet balance and convert between money and Glo Coins seamlessly.
+                Manage your payments through multiple gateways including JusPay and Razorpay. Add funds, track transactions, and manage your wallet balance.
             </p>
             <div class="success" id="successMessage"></div>
             <div class="error" id="errorMessage"></div>
@@ -763,9 +763,9 @@
                     <p>Available Money</p>
                 </div>
                 <div class="balance-card">
-                    <h3>🪙 Glo Coin Balance</h3>
+                    <h3>💎 Token Balance</h3>
                     <div class="amount" id="gloBalance">0.00</div>
-                    <p>Glo Coins</p>
+                    <p>Platform Tokens</p>
                 </div>
                 <div class="balance-card secondary">
                     <h3>📊 Total Withdrawn</h3>
@@ -776,9 +776,9 @@
         </div>
 
         <div class="bank-section">
-            <h2 style="text-align: center; margin-bottom: 2rem; color: #333;">Bank Account Information</h2>
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #333;">Withdrawal Account Information</h2>
             <div class="bank-info" id="bankInfo" style="display: none;">
-                <h4>Current Bank Account</h4>
+                <h4>Current Withdrawal Account</h4>
                 <p><strong>Bank Name:</strong> <span id="bankName">-</span></p>
                 <p><strong>Account Holder:</strong> <span id="accountHolder">-</span></p>
                 <p><strong>Account Number:</strong> <span id="accountNumber">-</span></p>
@@ -857,26 +857,26 @@
                 <button type="button" class="btn btn-info" id="viewHistoryBtn" style="margin-top: 1rem;">View Withdrawal History</button>
             </div>
 
-            <!-- Convert Money to Glo Coin -->
+            <!-- Convert Money to Tokens -->
             <div class="action-card">
-                <h3>🔄 Convert Money to Glo Coin</h3>
-                <p style="color: #666; margin-bottom: 1rem;">Convert your wallet money to Glo Coins (1:1 ratio)</p>
+                <h3>🔄 Convert Money to Tokens</h3>
+                <p style="color: #666; margin-bottom: 1rem;">Convert your wallet money to platform tokens (1:1 ratio)</p>
                 <form id="convertToGloForm">
                     <div class="form-group">
                         <label for="convertToGloAmount">Amount ($)</label>
                         <input type="number" id="convertToGloAmount" name="amount" min="0.01" step="0.01" required>
                     </div>
-                    <button type="submit" class="btn btn-success" id="convertToGloBtn">Convert to Glo Coin</button>
+                    <button type="submit" class="btn btn-success" id="convertToGloBtn">Convert to Tokens</button>
                 </form>
             </div>
 
-            <!-- Convert Glo Coin to Money -->
+            <!-- Convert Tokens to Money -->
             <div class="action-card">
-                <h3>🔄 Convert Glo Coin to Money</h3>
-                <p style="color: #666; margin-bottom: 1rem;">Convert your Glo Coins back to money (1:1 ratio)</p>
+                <h3>🔄 Convert Tokens to Money</h3>
+                <p style="color: #666; margin-bottom: 1rem;">Convert your platform tokens back to money (1:1 ratio)</p>
                 <form id="convertToMoneyForm">
                     <div class="form-group">
-                        <label for="convertToMoneyAmount">Amount (Glo Coins)</label>
+                        <label for="convertToMoneyAmount">Amount (Tokens)</label>
                         <input type="number" id="convertToMoneyAmount" name="amount" min="0.01" step="0.01" required>
                     </div>
                     <button type="submit" class="btn btn-warning" id="convertToMoneyBtn">Convert to Money</button>
@@ -884,11 +884,11 @@
             </div>
         </div>
 
-        <!-- JusPay Payment Modal -->
+        <!-- Payment Gateway Modal -->
         <div id="paymentModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>Payment Gateway</h3>
+                    <h3>Payment Gateway Processing</h3>
                     <span class="close" id="closePaymentModal">&times;</span>
                 </div>
                 <div id="paymentContent">
@@ -900,7 +900,7 @@
                         <p><strong>Status:</strong> <span id="paymentStatus">Processing...</span></p>
                     </div>
                     <div class="payment-simulation">
-                        <h4>Simulate Payment (Testing)</h4>
+                        <h4>Simulate Payment (Testing Mode)</h4>
                         <p>This is a sandbox environment. Choose the payment outcome:</p>
                         <button type="button" class="btn btn-success" id="simulateSuccess">Simulate Success</button>
                         <button type="button" class="btn btn-danger" id="simulateFailure">Simulate Failure</button>
@@ -1079,7 +1079,7 @@
                 }
                 
                 if (amount > currentUser.glo_coin_balance) {
-                    showError('Insufficient Glo Coin balance');
+                    showError('Insufficient token balance');
                     return;
                 }
                 
