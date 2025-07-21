@@ -501,8 +501,8 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
-        .gateway-razorpay {
-            background: linear-gradient(135deg, #528ff0 0%, #3b82f6 100%);
+        .gateway-cashfree {
+            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
         }
 
         .payment-simulation p {
@@ -660,10 +660,10 @@
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
         
-        .gateway-razorpay {
-            background: linear-gradient(135deg, #3395ff, #1976d2);
+        .gateway-cashfree {
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
             color: white;
-            box-shadow: 0 8px 25px rgba(51, 149, 255, 0.4);
+            box-shadow: 0 8px 25px rgba(0, 210, 255, 0.4);
         }
         
         @keyframes glow {
@@ -677,17 +677,17 @@
             }
         }
 
-        .gateway-razorpay {
-            animation-name: glowRazorpay;
+        .gateway-cashfree {
+            animation-name: glowCashfree;
         }
 
-        @keyframes glowRazorpay {
+        @keyframes glowCashfree {
             0% { 
-                box-shadow: 0 8px 25px rgba(51, 149, 255, 0.4);
+                box-shadow: 0 8px 25px rgba(0, 210, 255, 0.4);
                 transform: scale(1);
             }
             100% { 
-                box-shadow: 0 12px 35px rgba(51, 149, 255, 0.6);
+                box-shadow: 0 12px 35px rgba(0, 210, 255, 0.6);
                 transform: scale(1.02);
             }
         }
@@ -1265,10 +1265,10 @@
             
             if (gateway === 'juspay') {
                 indicator.className = 'current-gateway-indicator gateway-juspay';
-                nameElement.textContent = '💜 Gateway A (Primary)';
-            } else if (gateway === 'razorpay') {
-                indicator.className = 'current-gateway-indicator gateway-razorpay';
-                nameElement.textContent = '💙 Gateway B (Secondary)';
+                nameElement.textContent = '💜 Gateway A (JusPay)';
+            } else if (gateway === 'cashfree') {
+                indicator.className = 'current-gateway-indicator gateway-cashfree';
+                nameElement.textContent = '� Gateway B (Cashfree)';
             } else {
                 indicator.className = 'current-gateway-indicator';
                 nameElement.textContent = '⚡ Payment Gateway';

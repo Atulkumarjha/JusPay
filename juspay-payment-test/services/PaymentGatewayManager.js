@@ -1,11 +1,11 @@
 const JusPayService = require('./JusPayService');
-const RazorpayService = require('./RazorpayService');
+const CashfreeService = require('./CashfreeService');
 
 class PaymentGatewayManager {
     constructor() {
         this.gateways = {
             juspay: new JusPayService(),
-            razorpay: new RazorpayService()
+            cashfree: new CashfreeService()
         };
         
         // Default gateway (can be changed by super admin)

@@ -10,7 +10,7 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Initialize Payment Gateway Manager (handles both JusPay and Razorpay)
+// Initialize Payment Gateway Manager (handles both JusPay and Cashfree)
 const paymentManager = new PaymentGatewayManager();
 
 // Middleware
@@ -296,17 +296,13 @@ app.get('/dashboard', (req, res) => {
     }
 });
 
-app.get('/dashboard', (req, res) => {
+// Keep the old route for backwards compatibility
+app.get('/glo-coin', (req, res) => {
     if (req.session.user) {
         res.sendFile(path.join(__dirname, 'public', 'glo-coin.html'));
     } else {
         res.redirect('/login');
     }
-});
-
-// Keep the old route for backwards compatibility
-app.get('/glo-coin', (req, res) => {
-    res.redirect('/dashboard');
 });
 
 // Login endpoint
@@ -779,7 +775,7 @@ app.post('/payment/create-order', async (req, res) => {
         // Generate order data using the payment manager
         const orderData = paymentManager.generateOrderData(amount, currency);
         
-        // Create payment session with the active gateway (JusPay or Razorpay)
+        // Create payment session with the active gateway (JusPay or Cashfree)
         const paymentSession = await paymentManager.createPaymentSession(orderData);
         
         // Store order in database
@@ -1049,6 +1045,50 @@ app.post('/webhook/juspay', (req, res) => {
     app.handle(req, res);
 });
 
+// Cashfree webhook endpoint
+app.post('/webhook/cashfree', (req, res) => {
+    console.log('=== Cashfree Webhook Received ===');
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body);
+    
+    try {
+        const { order_id, order_status, transaction_id, order_amount } = req.body;
+        
+        // In production, you would validate the webhook signature here
+        // const isValid = cashfreeService.validateWebhookSignature(req.body, req.headers['x-cf-signature']);
+        
+        console.log(`Processing Cashfree webhook for order: ${order_id}, status: ${order_status}`);
+        
+        // Update order status in database
+        const stmt = db.prepare(`
+            UPDATE orders SET 
+                status = ?, 
+                updated_at = ?,
+                webhook_data = ?,
+                transaction_id = ?
+            WHERE order_id = ?
+        `);
+        
+        stmt.run([order_status, new Date().toISOString(), JSON.stringify(req.body), transaction_id, order_id], (err) => {
+            if (err) {
+                console.error('Cashfree webhook database error:', err.message);
+            } else {
+                console.log('Order updated via Cashfree webhook:', order_id, 'Status:', order_status);
+            }
+        });
+        
+        res.status(200).json({
+            success: true,
+            message: 'Cashfree webhook processed successfully',
+            order_id: order_id
+        });
+        
+    } catch (error) {
+        console.error('Cashfree webhook processing error:', error);
+        res.status(500).json({ error: 'Webhook processing failed' });
+    }
+});
+
 // Super Admin Routes
 // ==================
 
@@ -1148,8 +1188,8 @@ app.get('/api/admin/orders', requireSuperAdmin, (req, res) => {
             let gateway = 'unknown';
             if (order.order_id.startsWith('JUSPAY_')) {
                 gateway = 'juspay';
-            } else if (order.order_id.startsWith('RAZORPAY_')) {
-                gateway = 'razorpay';
+            } else if (order.order_id.startsWith('CF_')) {
+                gateway = 'cashfree';
             }
             
             return {

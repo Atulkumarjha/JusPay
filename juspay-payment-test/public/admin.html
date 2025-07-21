@@ -307,11 +307,10 @@
             background: #667eea;
         }
 
-        .gateway-razorpay {
-            background: #528ff0;
-        }
-
-        .status-badge {
+        .gateway-cashfree {
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            color: white;
+        }        .status-badge {
             padding: 0.25rem 0.5rem;
             border-radius: 12px;
             font-size: 0.8rem;
@@ -402,8 +401,8 @@
         }
 
         .toggle-switch input:checked + .toggle-slider {
-            background: linear-gradient(135deg, #3395ff 0%, #1976d2 100%);
-            box-shadow: 0 8px 25px rgba(51, 149, 255, 0.4);
+            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+            box-shadow: 0 8px 25px rgba(0, 210, 255, 0.4);
         }
 
         .toggle-switch input:checked + .toggle-slider:before {
@@ -429,10 +428,10 @@
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
         }
 
-        .current-gateway-status.razorpay {
-            border-color: #3395ff;
-            color: #3395ff;
-            box-shadow: 0 8px 25px rgba(51, 149, 255, 0.2);
+        .current-gateway-status.cashfree {
+            border-color: #00d2ff;
+            color: #00d2ff;
+            box-shadow: 0 8px 25px rgba(0, 210, 255, 0.2);
         }
 
         .gateway-details {
@@ -527,12 +526,12 @@
                 <div class="gateway-toggle-section">
                     <h3>Quick Gateway Switch</h3>
                     <div class="toggle-container">
-                        <span class="toggle-label">Gateway A</span>
+                        <span class="toggle-label">Gateway A (JusPay)</span>
                         <label class="toggle-switch">
                             <input type="checkbox" id="gatewayToggle">
                             <span class="toggle-slider"></span>
                         </label>
-                        <span class="toggle-label">Gateway B</span>
+                        <span class="toggle-label">Gateway B (Cashfree)</span>
                     </div>
                     <div class="current-gateway-status">
                         <span id="currentGatewayStatus">Loading...</span>
@@ -653,13 +652,13 @@
                     const toggle = document.getElementById('gatewayToggle');
                     const statusElement = document.getElementById('currentGatewayStatus');
                     
-                    if (currentGateway === 'razorpay') {
+                    if (currentGateway === 'cashfree') {
                         toggle.checked = true;
-                        statusElement.textContent = '🔵 Gateway B Active';
-                        statusElement.className = 'current-gateway-status razorpay';
+                        statusElement.textContent = '� Gateway B (Cashfree) Active';
+                        statusElement.className = 'current-gateway-status cashfree';
                     } else {
                         toggle.checked = false;
-                        statusElement.textContent = '🟣 Gateway A Active';
+                        statusElement.textContent = '🟣 Gateway A (JusPay) Active';
                         statusElement.className = 'current-gateway-status';
                     }
                     
@@ -695,8 +694,8 @@
         }
 
         async function handleGatewayToggle(event) {
-            const isRazorpay = event.target.checked;
-            const newGateway = isRazorpay ? 'razorpay' : 'juspay';
+            const isCashfree = event.target.checked;
+            const newGateway = isCashfree ? 'cashfree' : 'juspay';
             
             if (newGateway === currentGateway) {
                 return; // No change needed
@@ -722,15 +721,15 @@
                     currentGateway = newGateway;
                     
                     // Update status display
-                    if (newGateway === 'razorpay') {
-                        statusElement.textContent = '🔵 Gateway B Active';
-                        statusElement.className = 'current-gateway-status razorpay';
+                    if (newGateway === 'cashfree') {
+                        statusElement.textContent = '� Gateway B (Cashfree) Active';
+                        statusElement.className = 'current-gateway-status cashfree';
                     } else {
-                        statusElement.textContent = '🟣 Gateway A Active';
+                        statusElement.textContent = '🟣 Gateway A (JusPay) Active';
                         statusElement.className = 'current-gateway-status';
                     }
                     
-                    const gatewayDisplayName = newGateway === 'razorpay' ? 'Gateway B' : 'Gateway A';
+                    const gatewayDisplayName = newGateway === 'cashfree' ? 'Gateway B (Cashfree)' : 'Gateway A (JusPay)';
                     showAlert(`✅ Gateway switched to ${gatewayDisplayName}!`, 'success');
                     
                     // Reload stats and gateway details
@@ -739,13 +738,13 @@
                     
                 } else {
                     // Revert toggle on error
-                    event.target.checked = currentGateway === 'razorpay';
+                    event.target.checked = currentGateway === 'cashfree';
                     statusElement.textContent = originalText;
                     showAlert(data.error || 'Failed to switch gateway', 'error');
                 }
             } catch (error) {
                 // Revert toggle on error
-                event.target.checked = currentGateway === 'razorpay';
+                event.target.checked = currentGateway === 'cashfree';
                 statusElement.textContent = originalText;
                 console.error('Error switching gateway:', error);
                 showAlert('Error switching payment gateway', 'error');
@@ -772,7 +771,7 @@
                         const statusClass = order.status === 'SUCCESS' ? 'status-success' : 
                                           order.status === 'PENDING' ? 'status-pending' : 'status-failed';
                         
-                        const gatewayClass = order.gateway === 'juspay' ? 'gateway-juspay' : 'gateway-razorpay';
+                        const gatewayClass = order.gateway === 'juspay' ? 'gateway-juspay' : 'gateway-cashfree';
                         
                         row.innerHTML = `
                             <td>${order.order_id}</td>
