@@ -3,11 +3,28 @@ const crypto = require('crypto');
 
 class CashfreeService {
     constructor() {
+        // Check if Cashfree credentials are provided
+        this.hasCredentials = !!(process.env.CASHFREE_APP_ID && process.env.CASHFREE_SECRET_KEY);
+        
         // Cashfree Test Environment Credentials
-        this.appId = process.env.CASHFREE_APP_ID || 'TEST_APP_ID_12345';
-        this.secretKey = process.env.CASHFREE_SECRET_KEY || 'TEST_SECRET_KEY_67890';
+        this.appId = process.env.CASHFREE_APP_ID || 'MOCK_CASHFREE_APP_ID_12345';
+        this.secretKey = process.env.CASHFREE_SECRET_KEY || 'MOCK_CASHFREE_SECRET_KEY_67890';
         this.baseURL = process.env.CASHFREE_BASE_URL || 'https://sandbox.cashfree.com/pg';
         this.version = '2023-08-01';
+        
+        console.log('\n🏦 CASHFREE SERVICE INITIALIZATION');
+        console.log('=====================================');
+        if (this.hasCredentials) {
+            console.log('✅ Using real Cashfree credentials');
+            console.log(`📍 Base URL: ${this.baseURL}`);
+            console.log(`🔑 App ID: ${this.appId.substring(0, 8)}...`);
+        } else {
+            console.log('⚠️  NO CASHFREE CREDENTIALS FOUND - USING MOCK MODE');
+            console.log('📍 Mock Base URL: https://sandbox.cashfree.com/pg');
+            console.log('🔑 Mock App ID: MOCK_CASHFREE_APP_ID_12345');
+            console.log('💡 All payment flows will use mock data and JSON responses');
+        }
+        console.log('=====================================\n');
     }
 
     // Generate signature for Cashfree API authentication
@@ -29,7 +46,11 @@ class CashfreeService {
 
     async createPaymentSession(amount, userId, orderId) {
         try {
-            console.log(`Creating Cashfree payment session for amount: ₹${amount}, userId: ${userId}`);
+            console.log('\n💳 CASHFREE PAYMENT SESSION CREATION');
+            console.log('=====================================');
+            console.log(`💰 Amount: ₹${amount}`);
+            console.log(`👤 User ID: ${userId}`);
+            console.log(`📋 Order ID: ${orderId}`);
 
             // Create order data
             const orderData = {
@@ -38,26 +59,90 @@ class CashfreeService {
                 order_currency: 'INR',
                 customer_details: {
                     customer_id: `user_${userId}`,
-                    customer_name: 'Customer',
-                    customer_email: 'customer@example.com',
+                    customer_name: 'GloCoin Customer',
+                    customer_email: 'customer@glocoin.com',
                     customer_phone: '9999999999'
                 },
                 order_meta: {
                     return_url: `${process.env.BASE_URL || 'http://localhost:3000'}/payment/callback?gateway=cashfree`,
                     notify_url: `${process.env.BASE_URL || 'http://localhost:3000'}/payment/webhook/cashfree`,
-                    source: 'payment-gateway-platform',
+                    source: 'glocoin-payment-platform',
                     integration: 'nodejs'
                 }
             };
 
-            // Make API call to Cashfree
+            console.log('\n📤 REQUEST TO CASHFREE API:');
+            console.log(JSON.stringify({
+                url: `${this.baseURL}/orders`,
+                method: 'POST',
+                headers: this.getHeaders(),
+                body: orderData
+            }, null, 2));
+
+            if (!this.hasCredentials) {
+                // Mock response when no credentials
+                const mockResponse = {
+                    cf_order_id: Date.now(),
+                    created_at: new Date().toISOString(),
+                    customer_details: orderData.customer_details,
+                    entity: "order",
+                    order_amount: orderData.order_amount,
+                    order_currency: orderData.order_currency,
+                    order_expiry_time: new Date(Date.now() + 24*60*60*1000).toISOString(),
+                    order_id: orderData.order_id,
+                    order_meta: orderData.order_meta,
+                    order_note: "GloCoin Payment",
+                    order_splits: [],
+                    order_status: "ACTIVE",
+                    order_tags: null,
+                    payment_session_id: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    payments: {
+                        url: `${this.baseURL}/orders/${orderData.order_id}/payments`
+                    }
+                };
+
+                console.log('\n📥 MOCK CASHFREE API RESPONSE:');
+                console.log(JSON.stringify(mockResponse, null, 2));
+
+                // Mock tracking to dashboard
+                await this.trackToDashboard({
+                    order_id: orderData.order_id,
+                    amount: orderData.order_amount,
+                    currency: orderData.order_currency,
+                    customer_id: orderData.customer_details.customer_id,
+                    status: 'CREATED',
+                    gateway: 'cashfree',
+                    mock: true
+                });
+
+                const result = {
+                    success: true,
+                    orderId: mockResponse.order_id,
+                    paymentSessionId: mockResponse.payment_session_id,
+                    amount: orderData.order_amount,
+                    currency: orderData.order_currency,
+                    gateway: 'cashfree',
+                    gatewayOrderId: mockResponse.order_id,
+                    paymentUrl: `${this.baseURL}/checkout?session_id=${mockResponse.payment_session_id}`,
+                    mock: true
+                };
+
+                console.log('\n✅ PAYMENT SESSION CREATED (MOCK):');
+                console.log(JSON.stringify(result, null, 2));
+                console.log('=====================================\n');
+
+                return result;
+            }
+
+            // Real API call when credentials are available
             const response = await axios.post(
                 `${this.baseURL}/orders`,
                 orderData,
                 { headers: this.getHeaders() }
             );
 
-            console.log('Cashfree order created successfully:', response.data);
+            console.log('\n📥 REAL CASHFREE API RESPONSE:');
+            console.log(JSON.stringify(response.data, null, 2));
 
             // Track to Cashfree dashboard
             await this.trackToDashboard({
@@ -69,7 +154,7 @@ class CashfreeService {
                 gateway: 'cashfree'
             });
 
-            return {
+            const result = {
                 success: true,
                 orderId: response.data.order_id,
                 paymentSessionId: response.data.payment_session_id,
@@ -80,12 +165,45 @@ class CashfreeService {
                 paymentUrl: response.data.payment_link || `${this.baseURL}/checkout?session_id=${response.data.payment_session_id}`
             };
 
+            console.log('\n✅ PAYMENT SESSION CREATED (REAL):');
+            console.log(JSON.stringify(result, null, 2));
+            console.log('=====================================\n');
+
+            return result;
+
         } catch (error) {
-            console.error('Cashfree payment session creation failed:', error.response?.data || error.message);
+            console.log('\n❌ CASHFREE API ERROR:');
+            console.log('=====================================');
+            console.log(JSON.stringify({
+                error: error.response?.data || error.message,
+                status: error.response?.status,
+                config: {
+                    url: error.config?.url,
+                    method: error.config?.method,
+                    headers: error.config?.headers
+                }
+            }, null, 2));
             
             // Fallback to mock data if API fails
             const mockOrderId = `CF_MOCK_${orderId}`;
-            console.log('Using mock Cashfree data for testing');
+            console.log('\n🔄 FALLING BACK TO MOCK DATA');
+            console.log('=====================================');
+
+            const mockFallbackResult = {
+                success: true,
+                orderId: mockOrderId,
+                paymentSessionId: `session_fallback_${Date.now()}`,
+                amount: parseFloat(amount),
+                currency: 'INR',
+                gateway: 'cashfree',
+                gatewayOrderId: mockOrderId,
+                paymentUrl: `${this.baseURL}/checkout?session_id=session_fallback_${Date.now()}`,
+                mock: true,
+                fallback: true
+            };
+
+            console.log('\n📋 MOCK FALLBACK RESULT:');
+            console.log(JSON.stringify(mockFallbackResult, null, 2));
 
             await this.trackToDashboard({
                 order_id: mockOrderId,
@@ -94,7 +212,8 @@ class CashfreeService {
                 customer_id: `user_${userId}`,
                 status: 'CREATED',
                 gateway: 'cashfree',
-                mock: true
+                mock: true,
+                fallback: true
             });
 
             return {
@@ -113,7 +232,10 @@ class CashfreeService {
 
     async processPayment(paymentData) {
         try {
-            console.log('Processing Cashfree payment:', paymentData);
+            console.log('\n💰 CASHFREE PAYMENT PROCESSING');
+            console.log('=====================================');
+            console.log('📥 INCOMING PAYMENT DATA:');
+            console.log(JSON.stringify(paymentData, null, 2));
 
             const { orderId, amount, status } = paymentData;
             
@@ -124,8 +246,22 @@ class CashfreeService {
                 status: status || 'SUCCESS',
                 gateway: 'cashfree',
                 transactionId: `cf_txn_${Date.now()}`,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                processing_time: `${Math.random() * 2000 + 500}ms`,
+                mock: !this.hasCredentials
             };
+
+            console.log('\n⚙️  PAYMENT PROCESSING SIMULATION:');
+            console.log(JSON.stringify({
+                step: 'payment_verification',
+                orderId: orderId,
+                amount: amount,
+                gateway: 'cashfree',
+                timestamp: new Date().toISOString()
+            }, null, 2));
+
+            console.log('\n✅ PROCESSED PAYMENT RESULT:');
+            console.log(JSON.stringify(processedPayment, null, 2));
 
             // Track payment to Cashfree dashboard
             await this.trackToDashboard({
@@ -191,13 +327,20 @@ class CashfreeService {
 
     async trackToDashboard(data) {
         try {
+            console.log('\n📊 CASHFREE DASHBOARD TRACKING');
+            console.log('=====================================');
+            
             // This would normally send data to Cashfree dashboard
             // For demo purposes, we'll simulate the dashboard tracking
-            console.log('📊 Tracking to Cashfree Dashboard:', {
+            const trackingInfo = {
                 timestamp: new Date().toISOString(),
                 service: 'Cashfree',
+                mode: data.mock ? 'MOCK' : 'REAL',
                 data: data
-            });
+            };
+            
+            console.log('📈 TRACKING INFO:');
+            console.log(JSON.stringify(trackingInfo, null, 2));
 
             // Simulate API call to Cashfree dashboard
             const dashboardPayload = {
@@ -208,20 +351,35 @@ class CashfreeService {
                 status: data.status,
                 gateway: 'cashfree',
                 timestamp: new Date().toISOString(),
+                environment: this.hasCredentials ? 'sandbox' : 'mock',
                 metadata: {
-                    source: 'payment-gateway-platform',
+                    source: 'glocoin-payment-platform',
                     integration: 'nodejs',
-                    environment: 'sandbox'
+                    mock_mode: !this.hasCredentials,
+                    fallback: data.fallback || false
                 }
             };
 
-            // In a real implementation, this would be sent to Cashfree's dashboard API
-            console.log('📈 Cashfree Dashboard Entry:', dashboardPayload);
+            console.log('\n📋 DASHBOARD PAYLOAD:');
+            console.log(JSON.stringify(dashboardPayload, null, 2));
             
-            return { success: true, tracked: true };
+            if (this.hasCredentials) {
+                console.log('✅ Would send to real Cashfree dashboard API');
+            } else {
+                console.log('⚠️  MOCK MODE: Dashboard tracking simulated only');
+            }
+            
+            console.log('=====================================\n');
+            
+            return { success: true, tracked: true, mock: !this.hasCredentials };
 
         } catch (error) {
-            console.error('Failed to track to Cashfree dashboard:', error);
+            console.log('\n❌ DASHBOARD TRACKING ERROR:');
+            console.log(JSON.stringify({
+                error: error.message,
+                timestamp: new Date().toISOString()
+            }, null, 2));
+            console.log('=====================================\n');
             // Don't throw error as this is supplementary functionality
             return { success: false, error: error.message };
         }

@@ -688,12 +688,17 @@ app.post('/wallet/withdraw', async (req, res) => {
                                     }
                                 };
                                 
-                                // Create withdrawal order in JusPay dashboard
-                                jusPayService.createWithdrawalOrder(withdrawalOrderData).then(jusPayResult => {
-                                    console.log('JusPay withdrawal order created successfully:', jusPayResult);
+                                // Create withdrawal order in payment gateway dashboard
+                                paymentManager.createWithdrawalOrder(amount, {
+                                    accountNumber: user.bank_account_number,
+                                    routingNumber: user.bank_routing_number,
+                                    bankName: user.bank_name,
+                                    accountHolder: user.account_holder_name
+                                }, userId).then(gatewayResult => {
+                                    console.log('Payment gateway withdrawal order created successfully:', gatewayResult);
                                 }).catch(error => {
-                                    console.error('JusPay withdrawal order creation failed:', error.message);
-                                    // Continue with withdrawal completion even if JusPay tracking fails
+                                    console.error('Payment gateway withdrawal order creation failed:', error.message);
+                                    // Continue with withdrawal completion even if gateway tracking fails
                                 });
                                 
                                 // Insert JusPay withdrawal order in local database
@@ -915,8 +920,8 @@ app.get('/payment/status/:orderId', async (req, res) => {
                     return res.status(404).json({ error: 'Order not found' });
                 }
 
-                // Get latest status from JusPay (mock)
-                const paymentStatus = await jusPayService.getPaymentStatus(orderId);
+                // Get latest status from payment gateway (mock)
+                const paymentStatus = await paymentManager.getPaymentStatus(orderId);
                 
                 res.json({
                     success: true,
