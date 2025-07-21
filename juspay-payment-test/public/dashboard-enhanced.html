@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Dashboard - Transaction Management</title>
+    <link rel="stylesheet" href="modern-ui.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .dashboard-platform {
+            min-height: 100vh;
+            background: var(--primary-gradient);
+            position: relative;
+        }
+
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: var(--space-md) 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--space-lg);
+        }
+
+        .dashboard-brand {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .dashboard-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-gradient);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        .brand-info h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #fff, #e0e7ff, #c7d2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .brand-tagline {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: var(--space-md);
+        }
+
+        .nav-tab {
+            padding: var(--space-sm) var(--space-lg);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-lg);
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all var(--transition-normal);
+        }
+
+        .nav-tab:hover, .nav-tab.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-lg);
+            color: white;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-xl) var(--space-lg);
+        }
+
+        .dashboard-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+
+        .overview-card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-medium);
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .overview-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+        }
+
+        .overview-card:nth-child(1)::before {
+            background: var(--success-gradient);
+        }
+
+        .overview-card:nth-child(2)::before {
+            background: var(--warning-gradient);
+        }
+
+        .overview-card:nth-child(3)::before {
+            background: var(--error-gradient);
+        }
+
+        .overview-card:nth-child(4)::before {
+            background: var(--accent-gradient);
+        }
+
+        .overview-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-strong);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .success-icon { background: var(--success-gradient); }
+        .warning-icon { background: var(--warning-gradient); }
+        .error-icon { background: var(--error-gradient); }
+        .accent-icon { background: var(--accent-gradient); }
+
+        .card-title {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 0;
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            font-family: var(--font-mono);
+            margin-bottom: var(--space-sm);
+        }
+
+        .card-change {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .positive { color: #48bb78; }
+        .negative { color: #f56565; }
+
+        .dashboard-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: var(--space-xl);
+        }
+
+        .transactions-panel {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            margin-bottom: var(--space-lg);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: var(--space-sm);
+        }
+
+        .action-btn {
+            padding: var(--space-sm) var(--space-md);
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-md);
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+
+        .action-btn:hover, .action-btn.active {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .transactions-list {
+            max-height: 600px;
+            overflow-y: auto;
+            margin-bottom: var(--space-lg);
+        }
+
+        .transaction-row {
+            display: flex;
+            align-items: center;
+            padding: var(--space-lg);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-md);
+            transition: all var(--transition-normal);
+            cursor: pointer;
+        }
+
+        .transaction-row:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .transaction-status {
+            width: 50px;
+            height: 50px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-right: var(--space-lg);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .status-success { background: var(--success-gradient); }
+        .status-pending { background: var(--warning-gradient); }
+        .status-failed { background: var(--error-gradient); }
+
+        .transaction-details {
+            flex: 1;
+        }
+
+        .transaction-id {
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: var(--space-xs);
+        }
+
+        .transaction-meta {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: var(--font-mono);
+        }
+
+        .transaction-amount {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            font-family: var(--font-mono);
+            text-align: right;
+        }
+
+        .gateway-badge {
+            font-size: 0.625rem;
+            padding: 2px 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: var(--space-xs);
+        }
+
+        .sidebar-panel {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+
+        .quick-stats {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-md) 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        .stat-value {
+            color: white;
+            font-weight: 700;
+            font-family: var(--font-mono);
+        }
+
+        .gateway-status {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .gateway-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-md);
+        }
+
+        .gateway-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .gateway-active { background: #48bb78; }
+        .gateway-inactive { background: #a0aec0; }
+
+        .gateway-name {
+            color: white;
+            font-weight: 600;
+        }
+
+        .gateway-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .no-transactions {
+            text-align: center;
+            padding: var(--space-xl);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .no-transactions-icon {
+            font-size: 4rem;
+            margin-bottom: var(--space-lg);
+        }
+
+        .loading-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-xl);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .loading-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-left: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: var(--space-md);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-lg);
+        }
+
+        .filter-tab {
+            padding: var(--space-sm) var(--space-md);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-md);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+
+        .filter-tab:hover, .filter-tab.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-content {
+                grid-template-columns: 1fr;
+                gap: var(--space-lg);
+            }
+            
+            .sidebar-panel {
+                order: -1;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: var(--space-lg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: var(--space-md);
+                text-align: center;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                gap: var(--space-md);
+            }
+            
+            .main-content {
+                padding: var(--space-lg) var(--space-md);
+            }
+            
+            .dashboard-overview {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-platform">
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div class="dashboard-brand">
+                    <div class="dashboard-icon">📊</div>
+                    <div class="brand-info">
+                        <h1>Payment Dashboard</h1>
+                        <div class="brand-tagline">Transaction Management</div>
+                    </div>
+                </div>
+                
+                <div class="header-actions">
+                    <nav class="nav-tabs">
+                        <a href="/dashboard" class="nav-tab active">Dashboard</a>
+                        <a href="/glo-coin" class="nav-tab">New Payment</a>
+                        <a href="#" class="nav-tab">Analytics</a>
+                    </nav>
+                    
+                    <div class="user-section">
+                        <div class="user-info">
+                            👤 <span id="currentUser">Loading...</span>
+                        </div>
+                        <button class="btn btn-error btn-sm" onclick="logout()">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="dashboard-overview">
+                <div class="overview-card animate-slide-up">
+                    <div class="card-header">
+                        <div class="card-icon success-icon">✅</div>
+                        <h3 class="card-title">Successful Transactions</h3>
+                    </div>
+                    <div class="card-value" id="successfulCount">-</div>
+                    <div class="card-change positive" id="successfulChange">+0% from last month</div>
+                </div>
+                
+                <div class="overview-card animate-slide-up" style="animation-delay: 0.1s;">
+                    <div class="card-header">
+                        <div class="card-icon warning-icon">⏳</div>
+                        <h3 class="card-title">Pending Transactions</h3>
+                    </div>
+                    <div class="card-value" id="pendingCount">-</div>
+                    <div class="card-change" id="pendingChange">Processing...</div>
+                </div>
+                
+                <div class="overview-card animate-slide-up" style="animation-delay: 0.2s;">
+                    <div class="card-header">
+                        <div class="card-icon error-icon">❌</div>
+                        <h3 class="card-title">Failed Transactions</h3>
+                    </div>
+                    <div class="card-value" id="failedCount">-</div>
+                    <div class="card-change negative" id="failedChange">0% failure rate</div>
+                </div>
+                
+                <div class="overview-card animate-slide-up" style="animation-delay: 0.3s;">
+                    <div class="card-header">
+                        <div class="card-icon accent-icon">💰</div>
+                        <h3 class="card-title">Total Volume</h3>
+                    </div>
+                    <div class="card-value" id="totalVolume">₹-</div>
+                    <div class="card-change positive" id="volumeChange">All time total</div>
+                </div>
+            </section>
+
+            <div class="dashboard-content">
+                <div class="transactions-panel animate-fade-in" style="animation-delay: 0.4s;">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            📋 Transaction History
+                        </h2>
+                        <div class="panel-actions">
+                            <button class="action-btn" onclick="refreshTransactions()">
+                                🔄 Refresh
+                            </button>
+                            <button class="action-btn" onclick="exportTransactions()">
+                                📥 Export
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" onclick="filterTransactions('all')">All</button>
+                        <button class="filter-tab" onclick="filterTransactions('success')">Success</button>
+                        <button class="filter-tab" onclick="filterTransactions('pending')">Pending</button>
+                        <button class="filter-tab" onclick="filterTransactions('failed')">Failed</button>
+                    </div>
+                    
+                    <div class="transactions-list" id="transactionsList">
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            Loading transactions...
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="sidebar-panel">
+                    <div class="quick-stats animate-slide-right" style="animation-delay: 0.5s;">
+                        <h3 class="panel-title">📈 Quick Stats</h3>
+                        <div class="stat-item">
+                            <span class="stat-label">Today's Transactions</span>
+                            <span class="stat-value" id="todayCount">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">This Week</span>
+                            <span class="stat-value" id="weekCount">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">This Month</span>
+                            <span class="stat-value" id="monthVolume">₹-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Average Amount</span>
+                            <span class="stat-value" id="avgAmount">₹-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Success Rate</span>
+                            <span class="stat-value" id="successRate">-%</span>
+                        </div>
+                    </div>
+
+                    <div class="gateway-status animate-slide-right" style="animation-delay: 0.6s;">
+                        <h3 class="panel-title">⚡ Gateway Status</h3>
+                        <div class="gateway-item">
+                            <div class="gateway-indicator gateway-active" id="juspayIndicator"></div>
+                            <div>
+                                <div class="gateway-name">JusPay</div>
+                                <div class="gateway-label" id="juspayStatus">Active</div>
+                            </div>
+                        </div>
+                        <div class="gateway-item">
+                            <div class="gateway-indicator gateway-inactive" id="cashfreeIndicator"></div>
+                            <div>
+                                <div class="gateway-name">Cashfree</div>
+                                <div class="gateway-label" id="cashfreeStatus">Standby</div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let allTransactions = [];
+        let currentFilter = 'all';
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadUserData();
+            await loadTransactions();
+            await loadGatewayStatus();
+            
+            // Set up auto-refresh
+            setInterval(loadTransactions, 30000); // Refresh every 30 seconds
+        });
+
+        async function loadUserData() {
+            try {
+                // Get username from storage or session
+                const username = localStorage.getItem('username') || 'User';
+                document.getElementById('currentUser').textContent = username;
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        async function loadTransactions() {
+            try {
+                const response = await fetch('/orders');
+                allTransactions = await response.json();
+                
+                updateDashboardStats();
+                displayTransactions();
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+                document.getElementById('transactionsList').innerHTML = `
+                    <div class="no-transactions">
+                        <div class="no-transactions-icon">⚠️</div>
+                        <h3>Error Loading Transactions</h3>
+                        <p>Please try refreshing the page</p>
+                    </div>
+                `;
+            }
+        }
+
+        function updateDashboardStats() {
+            const successful = allTransactions.filter(t => 
+                t.status === 'CHARGED' || t.status === 'SUCCESS'
+            );
+            const pending = allTransactions.filter(t => 
+                t.status === 'CREATED' || t.status === 'PENDING'
+            );
+            const failed = allTransactions.filter(t => 
+                t.status === 'AUTHORIZATION_FAILED' || t.status === 'FAILED'
+            );
+            
+            const totalVolume = allTransactions.reduce((sum, t) => 
+                sum + parseFloat(t.amount), 0
+            );
+            
+            const today = new Date().toDateString();
+            const todayTransactions = allTransactions.filter(t => 
+                new Date(t.created_at).toDateString() === today
+            );
+            
+            const thisWeek = allTransactions.filter(t => {
+                const transactionDate = new Date(t.created_at);
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                return transactionDate >= weekAgo;
+            });
+            
+            const thisMonth = allTransactions.filter(t => {
+                const transactionDate = new Date(t.created_at);
+                const monthAgo = new Date();
+                monthAgo.setMonth(monthAgo.getMonth() - 1);
+                return transactionDate >= monthAgo;
+            });
+            
+            const monthVolume = thisMonth.reduce((sum, t) => 
+                sum + parseFloat(t.amount), 0
+            );
+            
+            const avgAmount = allTransactions.length > 0 ? 
+                totalVolume / allTransactions.length : 0;
+            
+            const successRate = allTransactions.length > 0 ? 
+                (successful.length / allTransactions.length * 100).toFixed(1) : 0;
+            
+            // Update overview cards
+            document.getElementById('successfulCount').textContent = successful.length;
+            document.getElementById('pendingCount').textContent = pending.length;
+            document.getElementById('failedCount').textContent = failed.length;
+            document.getElementById('totalVolume').textContent = `₹${totalVolume.toLocaleString()}`;
+            
+            // Update sidebar stats
+            document.getElementById('todayCount').textContent = todayTransactions.length;
+            document.getElementById('weekCount').textContent = thisWeek.length;
+            document.getElementById('monthVolume').textContent = `₹${monthVolume.toLocaleString()}`;
+            document.getElementById('avgAmount').textContent = `₹${avgAmount.toLocaleString()}`;
+            document.getElementById('successRate').textContent = `${successRate}%`;
+            
+            // Update change indicators
+            document.getElementById('successfulChange').textContent = `${successRate}% success rate`;
+            document.getElementById('pendingChange').textContent = `${pending.length} processing`;
+            document.getElementById('failedChange').textContent = `${(failed.length / allTransactions.length * 100).toFixed(1)}% failure rate`;
+            document.getElementById('volumeChange').textContent = `${allTransactions.length} total transactions`;
+        }
+
+        function displayTransactions() {
+            const transactionsList = document.getElementById('transactionsList');
+            
+            let filteredTransactions = allTransactions;
+            
+            if (currentFilter !== 'all') {
+                filteredTransactions = allTransactions.filter(transaction => {
+                    switch (currentFilter) {
+                        case 'success':
+                            return transaction.status === 'CHARGED' || transaction.status === 'SUCCESS';
+                        case 'pending':
+                            return transaction.status === 'CREATED' || transaction.status === 'PENDING';
+                        case 'failed':
+                            return transaction.status === 'AUTHORIZATION_FAILED' || transaction.status === 'FAILED';
+                        default:
+                            return true;
+                    }
+                });
+            }
+            
+            if (filteredTransactions.length === 0) {
+                transactionsList.innerHTML = `
+                    <div class="no-transactions">
+                        <div class="no-transactions-icon">📝</div>
+                        <h3>No Transactions Found</h3>
+                        <p>No transactions match the current filter</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Clear and build the list properly
+            transactionsList.innerHTML = '';
+            
+            filteredTransactions.forEach(transaction => {
+                const isSuccess = transaction.status === 'CHARGED' || transaction.status === 'SUCCESS';
+                const isPending = transaction.status === 'CREATED' || transaction.status === 'PENDING';
+                const isFailed = transaction.status === 'AUTHORIZATION_FAILED' || transaction.status === 'FAILED';
+                
+                let statusClass, statusIcon;
+                if (isSuccess) {
+                    statusClass = 'status-success';
+                    statusIcon = '✅';
+                } else if (isPending) {
+                    statusClass = 'status-pending';
+                    statusIcon = '⏳';
+                } else {
+                    statusClass = 'status-failed';
+                    statusIcon = '❌';
+                }
+                
+                const createdDate = new Date(transaction.created_at);
+                const formattedDate = createdDate.toLocaleDateString();
+                const formattedTime = createdDate.toLocaleTimeString();
+                
+                // Enhanced gateway information
+                const gatewayInfo = transaction.gateway_info || {
+                    display_name: transaction.gateway ? transaction.gateway.toUpperCase() : 'Unknown',
+                    color: '#9CA3AF',
+                    icon: '❓',
+                    description: 'Gateway information not available'
+                };
+                
+                // Create transaction row element
+                const transactionRow = document.createElement('div');
+                transactionRow.className = 'transaction-row';
+                transactionRow.onclick = () => viewTransactionDetails(transaction.order_id);
+                
+                // Create gateway badge with proper styling
+                const gatewayBadge = document.createElement('div');
+                gatewayBadge.className = 'gateway-badge-enhanced';
+                gatewayBadge.style.cssText = `
+                    background: linear-gradient(135deg, ${gatewayInfo.color}20, ${gatewayInfo.color}40);
+                    border: 1px solid ${gatewayInfo.color}60;
+                    color: ${gatewayInfo.color};
+                    margin-top: 4px;
+                    padding: 4px 8px;
+                    border-radius: 6px;
+                    font-size: 0.7rem;
+                    font-weight: 600;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                `;
+                gatewayBadge.innerHTML = `${gatewayInfo.icon} ${gatewayInfo.display_name}`;
+                
+                // Create gateway description
+                const gatewayDesc = document.createElement('div');
+                gatewayDesc.style.cssText = 'font-size: 0.65rem; color: rgba(255, 255, 255, 0.5); margin-top: 2px;';
+                gatewayDesc.textContent = gatewayInfo.description;
+                
+                transactionRow.innerHTML = `
+                    <div class="transaction-status ${statusClass}">
+                        ${statusIcon}
+                    </div>
+                    <div class="transaction-details">
+                        <div class="transaction-id">#${transaction.order_id}</div>
+                        <div class="transaction-meta">
+                            ${formattedDate} at ${formattedTime}
+                            <div class="gateway-info-container"></div>
+                        </div>
+                    </div>
+                    <div class="transaction-amount">
+                        ₹${parseFloat(transaction.amount).toLocaleString()}
+                    </div>
+                `;
+                
+                // Append the gateway badge and description properly
+                const gatewayContainer = transactionRow.querySelector('.gateway-info-container');
+                gatewayContainer.appendChild(gatewayBadge);
+                gatewayContainer.appendChild(gatewayDesc);
+                
+                transactionsList.appendChild(transactionRow);
+            });
+        }
+
+        async function loadGatewayStatus() {
+            try {
+                const response = await fetch('/admin/gateway-status');
+                const data = await response.json();
+                
+                const activeGateway = data.active_gateway;
+                
+                // Update gateway indicators
+                const juspayIndicator = document.getElementById('juspayIndicator');
+                const cashfreeIndicator = document.getElementById('cashfreeIndicator');
+                const juspayStatus = document.getElementById('juspayStatus');
+                const cashfreeStatus = document.getElementById('cashfreeStatus');
+                
+                if (activeGateway === 'juspay') {
+                    juspayIndicator.className = 'gateway-indicator gateway-active';
+                    cashfreeIndicator.className = 'gateway-indicator gateway-inactive';
+                    juspayStatus.textContent = 'Active';
+                    cashfreeStatus.textContent = 'Standby';
+                } else {
+                    juspayIndicator.className = 'gateway-indicator gateway-inactive';
+                    cashfreeIndicator.className = 'gateway-indicator gateway-active';
+                    juspayStatus.textContent = 'Standby';
+                    cashfreeStatus.textContent = 'Active';
+                }
+            } catch (error) {
+                console.error('Error loading gateway status:', error);
+            }
+        }
+
+        function filterTransactions(filter) {
+            currentFilter = filter;
+            
+            // Update filter tab UI
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Re-display transactions with new filter
+            displayTransactions();
+        }
+
+        function viewTransactionDetails(orderId) {
+            const transaction = allTransactions.find(t => t.order_id === orderId);
+            if (transaction) {
+                const gatewayInfo = transaction.gateway_info || {
+                    display_name: 'Unknown Gateway',
+                    description: 'Gateway information not available',
+                    environment: 'Unknown',
+                    provider: 'Unknown',
+                    color: '#9CA3AF',
+                    icon: '💳'
+                };
+                
+                const createdDate = new Date(transaction.created_at);
+                const updatedDate = transaction.updated_at ? new Date(transaction.updated_at) : null;
+                
+                // Create modal overlay
+                const modal = document.createElement('div');
+                modal.id = 'transactionModal';
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.8);
+                    backdrop-filter: blur(10px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                    padding: 1rem;
+                `;
+                
+                // Create modal content container
+                const modalContent = document.createElement('div');
+                modalContent.style.cssText = `
+                    background: rgba(255, 255, 255, 0.95);
+                    backdrop-filter: blur(20px);
+                    padding: 2rem;
+                    border-radius: 1rem;
+                    max-width: 500px;
+                    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+                `;
+                
+                // Header section
+                const header = document.createElement('div');
+                header.style.cssText = 'display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #f0f0f0;';
+                header.innerHTML = `
+                    <div style="font-size: 2rem;">${gatewayInfo.icon}</div>
+                    <div>
+                        <h2 style="margin: 0; color: #333; font-size: 1.5rem;">Transaction Details</h2>
+                        <p style="margin: 0; color: #666; font-size: 0.9rem;">Order #${transaction.order_id}</p>
+                    </div>
+                `;
+                
+                // Main content grid
+                const contentGrid = document.createElement('div');
+                contentGrid.style.cssText = 'display: grid; gap: 1rem;';
+                
+                // Amount and Status row
+                const amountStatusRow = document.createElement('div');
+                amountStatusRow.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;';
+                
+                const statusColor = transaction.status === 'CHARGED' || transaction.status === 'SUCCESS' ? '#48bb78' : 
+                                   transaction.status === 'FAILED' ? '#f56565' : '#f59e0b';
+                
+                amountStatusRow.innerHTML = `
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 0.5rem;">
+                        <p style="margin: 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Amount</p>
+                        <p style="margin: 0; color: #333; font-size: 1.5rem; font-weight: bold;">₹${parseFloat(transaction.amount).toLocaleString()}</p>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 0.5rem;">
+                        <p style="margin: 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Status</p>
+                        <p style="margin: 0; color: ${statusColor}; font-size: 1.2rem; font-weight: bold;">${transaction.status}</p>
+                    </div>
+                `;
+                
+                // Gateway section
+                const gatewaySection = document.createElement('div');
+                gatewaySection.style.cssText = `
+                    background: linear-gradient(135deg, ${gatewayInfo.color}20, ${gatewayInfo.color}10);
+                    padding: 1rem;
+                    border-radius: 0.5rem;
+                    border: 1px solid ${gatewayInfo.color}40;
+                `;
+                gatewaySection.innerHTML = `
+                    <p style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Payment Gateway</p>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.2rem;">${gatewayInfo.icon}</span>
+                        <span style="color: #333; font-size: 1.1rem; font-weight: 600;">${gatewayInfo.display_name}</span>
+                    </div>
+                    <p style="margin: 0; color: #666; font-size: 0.85rem;">${gatewayInfo.description}</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                        <p style="margin: 0; color: #666; font-size: 0.75rem;"><strong>Environment:</strong> ${gatewayInfo.environment}</p>
+                        <p style="margin: 0; color: #666; font-size: 0.75rem;"><strong>Provider:</strong> ${gatewayInfo.provider}</p>
+                    </div>
+                `;
+                
+                // Date section
+                const dateSection = document.createElement('div');
+                dateSection.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;';
+                
+                let dateHTML = `
+                    <div>
+                        <p style="margin: 0 0 0.25rem 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Created</p>
+                        <p style="margin: 0; color: #333; font-size: 0.9rem;">${createdDate.toLocaleDateString()}</p>
+                        <p style="margin: 0; color: #666; font-size: 0.8rem;">${createdDate.toLocaleTimeString()}</p>
+                    </div>
+                `;
+                
+                if (updatedDate) {
+                    dateHTML += `
+                        <div>
+                            <p style="margin: 0 0 0.25rem 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Updated</p>
+                            <p style="margin: 0; color: #333; font-size: 0.9rem;">${updatedDate.toLocaleDateString()}</p>
+                            <p style="margin: 0; color: #666; font-size: 0.8rem;">${updatedDate.toLocaleTimeString()}</p>
+                        </div>
+                    `;
+                }
+                
+                dateSection.innerHTML = dateHTML;
+                
+                // Transaction ID section (if available)
+                if (transaction.transaction_id) {
+                    const transactionIdSection = document.createElement('div');
+                    transactionIdSection.style.cssText = 'background: #f8f9fa; padding: 1rem; border-radius: 0.5rem;';
+                    transactionIdSection.innerHTML = `
+                        <p style="margin: 0 0 0.25rem 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Transaction ID</p>
+                        <p style="margin: 0; color: #333; font-size: 0.9rem; font-family: monospace; word-break: break-all;">${transaction.transaction_id}</p>
+                    `;
+                    contentGrid.appendChild(transactionIdSection);
+                }
+                
+                // Transaction type section (if available)
+                if (transaction.transaction_type) {
+                    const transactionTypeSection = document.createElement('div');
+                    transactionTypeSection.style.cssText = 'background: #f8f9fa; padding: 1rem; border-radius: 0.5rem;';
+                    transactionTypeSection.innerHTML = `
+                        <p style="margin: 0 0 0.25rem 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Transaction Type</p>
+                        <p style="margin: 0; color: #333; font-size: 0.9rem;">${transaction.transaction_type}</p>
+                    `;
+                    contentGrid.appendChild(transactionTypeSection);
+                }
+                
+                // Close button
+                const closeButton = document.createElement('div');
+                closeButton.style.cssText = 'margin-top: 1.5rem; text-align: center;';
+                closeButton.innerHTML = `
+                    <button onclick="closeTransactionModal()" style="background: #667eea; color: white; border: none; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                        Close
+                    </button>
+                `;
+                
+                // Assemble the modal
+                contentGrid.appendChild(amountStatusRow);
+                contentGrid.appendChild(gatewaySection);
+                contentGrid.appendChild(dateSection);
+                
+                modalContent.appendChild(header);
+                modalContent.appendChild(contentGrid);
+                modalContent.appendChild(closeButton);
+                
+                modal.appendChild(modalContent);
+                
+                // Add click outside to close
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeTransactionModal();
+                    }
+                });
+                
+                document.body.appendChild(modal);
+            }
+        }
+        
+        function closeTransactionModal() {
+            const modal = document.getElementById('transactionModal');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
+
+        async function refreshTransactions() {
+            document.getElementById('transactionsList').innerHTML = `
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    Refreshing transactions...
+                </div>
+            `;
+            
+            await loadTransactions();
+        }
+
+        function exportTransactions() {
+            // Create CSV content
+            const csvContent = [
+                ['Order ID', 'Amount', 'Status', 'Gateway', 'Created Date'].join(','),
+                ...allTransactions.map(t => [
+                    t.order_id,
+                    t.amount,
+                    t.status,
+                    t.gateway,
+                    new Date(t.created_at).toISOString()
+                ].join(','))
+            ].join('\n');
+            
+            // Create and download file
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        async function logout() {
+            try {
+                await fetch('/logout', { method: 'POST' });
+                localStorage.removeItem('username');
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+    </script>
+</body>
+</html>

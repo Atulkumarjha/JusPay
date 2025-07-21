@@ -772,24 +772,51 @@
                     return;
                 }
                 
-                transactionsList.innerHTML = orders.slice(0, 5).map(order => {
+                transactionsList.innerHTML = '';
+                
+                orders.slice(0, 5).forEach(order => {
                     const isSuccess = order.status === 'CHARGED' || order.status === 'SUCCESS';
                     const icon = isSuccess ? '✅' : '⏳';
                     const iconClass = isSuccess ? 'transaction-success' : 'transaction-pending';
                     
-                    return `
-                        <div class="transaction-item">
-                            <div class="transaction-icon ${iconClass}">${icon}</div>
-                            <div class="transaction-info">
-                                <div class="transaction-title">Payment #${order.order_id}</div>
-                                <div class="transaction-details">
-                                    ${new Date(order.created_at).toLocaleDateString()} • ${order.gateway.toUpperCase()}
-                                </div>
+                    // Enhanced gateway information
+                    const gatewayInfo = order.gateway_info || {
+                        display_name: order.gateway ? order.gateway.toUpperCase() : 'Unknown',
+                        color: '#9CA3AF',
+                        icon: '❓',
+                        description: 'Gateway information not available'
+                    };
+                    
+                    // Create transaction item
+                    const transactionItem = document.createElement('div');
+                    transactionItem.className = 'transaction-item';
+                    
+                    // Create gateway badge with proper styling
+                    const gatewaySpan = document.createElement('span');
+                    gatewaySpan.style.cssText = `color: ${gatewayInfo.color}; font-weight: 600;`;
+                    gatewaySpan.innerHTML = `${gatewayInfo.icon} ${gatewayInfo.display_name}`;
+                    
+                    transactionItem.innerHTML = `
+                        <div class="transaction-icon ${iconClass}">${icon}</div>
+                        <div class="transaction-info">
+                            <div class="transaction-title">Payment #${order.order_id}</div>
+                            <div class="transaction-details">
+                                ${new Date(order.created_at).toLocaleDateString()} • 
+                                <span class="gateway-span-placeholder"></span>
                             </div>
-                            <div class="transaction-amount">₹${order.amount}</div>
+                            <div style="font-size: 0.65rem; color: rgba(255, 255, 255, 0.5); margin-top: 2px;">
+                                ${gatewayInfo.description}
+                            </div>
                         </div>
+                        <div class="transaction-amount">₹${order.amount}</div>
                     `;
-                }).join('');
+                    
+                    // Replace placeholder with properly styled element
+                    const placeholder = transactionItem.querySelector('.gateway-span-placeholder');
+                    placeholder.replaceWith(gatewaySpan);
+                    
+                    transactionsList.appendChild(transactionItem);
+                });
             } catch (error) {
                 console.error('Error loading transactions:', error);
             }
@@ -916,6 +943,9 @@
             // Create notification element
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
+            
+            const borderColor = type === 'success' ? '#48bb78' : type === 'error' ? '#f56565' : '#667eea';
+            
             notification.style.cssText = `
                 position: fixed;
                 top: var(--space-lg);
@@ -925,7 +955,7 @@
                 padding: var(--space-md) var(--space-lg);
                 border-radius: var(--radius-lg);
                 box-shadow: var(--shadow-medium);
-                border-left: 4px solid ${type === 'success' ? '#48bb78' : type === 'error' ? '#f56565' : '#667eea'};
+                border-left: 4px solid ${borderColor};
                 z-index: 10000;
                 transform: translateX(400px);
                 transition: all var(--transition-normal);

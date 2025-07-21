@@ -818,7 +818,103 @@ app.get('/wallet/withdrawals', (req, res) => {
 
 // JusPay Integration Endpoints
 
-// Create payment order
+// Create payment order (new endpoint for frontend compatibility)
+app.post('/create-order', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const { amount, customerName, customerPhone, description, gateway } = req.body;
+    
+    if (!amount || amount <= 0) {
+        return res.status(400).json({ error: 'Invalid amount' });
+    }
+
+    const userId = req.session.user.id;
+
+    try {
+        // Use the specified gateway or default to active gateway
+        const selectedGateway = gateway || paymentManager.getActiveGatewayName();
+        
+        // Generate order ID with proper prefix for gateway
+        let orderIdPrefix = 'ORDER_';
+        if (selectedGateway === 'juspay') {
+            orderIdPrefix = 'JUSPAY_';
+        } else if (selectedGateway === 'cashfree') {
+            orderIdPrefix = 'CF_';
+        }
+        
+        const orderData = {
+            order_id: orderIdPrefix + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            amount: parseFloat(amount),
+            currency: 'INR',
+            customer_id: `cust_${userId}_${Date.now()}`,
+            customer_name: customerName || 'Customer',
+            customer_phone: customerPhone || '9999999999',
+            description: description || 'Payment via GloCoin Platform'
+        };
+        
+        console.log(`🚀 Creating ${selectedGateway.toUpperCase()} order:`, orderData.order_id);
+        
+        // Create payment session based on selected gateway
+        let paymentSession;
+        if (selectedGateway === 'cashfree') {
+            // Switch to Cashfree temporarily for this order
+            const originalGateway = paymentManager.getActiveGatewayName();
+            if (originalGateway !== 'cashfree') {
+                await paymentManager.switchGateway('cashfree');
+            }
+            paymentSession = await paymentManager.createPaymentSession(orderData);
+            // Switch back if needed
+            if (originalGateway !== 'cashfree') {
+                await paymentManager.switchGateway(originalGateway);
+            }
+        } else {
+            // Use JusPay (default)
+            const originalGateway = paymentManager.getActiveGatewayName();
+            if (originalGateway !== 'juspay') {
+                await paymentManager.switchGateway('juspay');
+            }
+            paymentSession = await paymentManager.createPaymentSession(orderData);
+            // Switch back if needed
+            if (originalGateway !== 'juspay') {
+                await paymentManager.switchGateway(originalGateway);
+            }
+        }
+        
+        // Store order in database with gateway information
+        console.log(`💾 Storing ${selectedGateway} order in database for user_id: ${userId}, order_id: ${orderData.order_id}`);
+        db.run(`INSERT INTO orders (user_id, order_id, session_id, amount, currency, status, customer_id, juspay_response, transaction_type) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
+            [userId, orderData.order_id, paymentSession.session_id || 'session_' + Date.now(), 
+             orderData.amount, orderData.currency, 'CREATED', orderData.customer_id, 
+             JSON.stringify({...paymentSession, gateway: selectedGateway}), 'PAYMENT'], 
+            function(err) {
+                if (err) {
+                    console.error('❌ Database error storing order:', err.message);
+                    return res.status(500).json({ error: 'Database error' });
+                }
+                
+                console.log(`✅ ${selectedGateway.toUpperCase()} order stored successfully: ${orderData.order_id} for user ${userId}`);
+                
+                res.json({
+                    success: true,
+                    gateway: selectedGateway,
+                    gateway_name: selectedGateway === 'cashfree' ? 'Cashfree Payments' : 'JusPay Payments',
+                    order_id: orderData.order_id,
+                    amount: orderData.amount,
+                    currency: orderData.currency,
+                    payment_url: paymentSession.payment_page_url || paymentSession.web || '#',
+                    message: `${selectedGateway.toUpperCase()} order created successfully`
+                });
+            });
+    } catch (error) {
+        console.error(`❌ ${gateway || 'Payment'} creation error:`, error.message);
+        res.status(500).json({ error: 'Failed to create payment order', details: error.message });
+    }
+});
+
+// Create payment order (legacy endpoint)
 app.post('/payment/create-order', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: 'Not authenticated' });
@@ -1003,7 +1099,7 @@ app.get('/payment/status/:orderId', async (req, res) => {
     }
 });
 
-// Get user's order history
+// Get user's order history with enhanced gateway information
 app.get('/payment/orders', (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: 'Not authenticated' });
@@ -1020,21 +1116,78 @@ app.get('/payment/orders', (req, res) => {
             }
             
             console.log(`📋 Found ${orders ? orders.length : 0} orders for user ${userId}`);
-            if (orders && orders.length > 0) {
-                console.log('📊 Recent orders:', orders.map(o => ({
+            
+            // Enhanced orders with detailed gateway information
+            const enhancedOrders = (orders || []).map(order => {
+                let gatewayInfo = {
+                    gateway: 'unknown',
+                    display_name: 'Unknown Gateway',
+                    color: '#9CA3AF',
+                    icon: '❓',
+                    description: 'Gateway not identified'
+                };
+
+                // Determine gateway based on order_id prefix
+                if (order.order_id.startsWith('JUSPAY_')) {
+                    gatewayInfo = {
+                        gateway: 'juspay',
+                        display_name: 'JusPay Payments',
+                        color: '#667EEA',
+                        icon: '🏦',
+                        description: 'Secure Digital Payments',
+                        environment: 'Sandbox',
+                        provider: 'JusPay India'
+                    };
+                } else if (order.order_id.startsWith('CF_')) {
+                    gatewayInfo = {
+                        gateway: 'cashfree',
+                        display_name: 'Cashfree Payments',
+                        color: '#00D2FF',
+                        icon: '💳',
+                        description: 'Mock Payment Gateway',
+                        environment: 'Mock Mode',
+                        provider: 'Cashfree Payments'
+                    };
+                } else if (order.order_id.startsWith('GLOCOIN_')) {
+                    gatewayInfo = {
+                        gateway: 'glocoin',
+                        display_name: 'GloCoin Wallet',
+                        color: '#F59E0B',
+                        icon: '🪙',
+                        description: 'Internal Wallet Transaction',
+                        environment: 'Live',
+                        provider: 'GloCoin Platform'
+                    };
+                }
+
+                return {
+                    ...order,
+                    gateway_info: gatewayInfo,
+                    // Legacy fields for backward compatibility
+                    gateway: gatewayInfo.gateway
+                };
+            });
+            
+            if (enhancedOrders.length > 0) {
+                console.log('📊 Recent orders with gateway info:', enhancedOrders.map(o => ({
                     order_id: o.order_id,
                     amount: o.amount,
                     status: o.status,
+                    gateway: o.gateway_info.display_name,
                     type: o.transaction_type,
                     created_at: o.created_at
                 })));
             }
             
-            res.json({ 
-                success: true, 
-                orders: orders || []
-            });
+            res.json(enhancedOrders);
         });
+});
+
+// Alias for frontend compatibility
+app.get('/orders', (req, res) => {
+    // Redirect to the main orders endpoint
+    req.url = '/payment/orders';
+    app._router.handle(req, res);
 });
 
 // Mock JusPay webhook endpoint
@@ -1282,14 +1435,18 @@ app.get('/api/admin/orders', requireSuperAdmin, (req, res) => {
     });
 });
 
-// Get platform statistics (super admin only)
-app.get('/api/admin/stats', requireSuperAdmin, (req, res) => {
+// Get platform analytics (super admin only)
+app.get('/admin/analytics', requireSuperAdmin, (req, res) => {
     const queries = [
         'SELECT COUNT(*) as total_users FROM users WHERE role != "superadmin"',
         'SELECT COUNT(*) as total_orders FROM orders',
-        'SELECT SUM(amount) as total_revenue FROM orders WHERE status = "SUCCESS"',
-        'SELECT SUM(wallet_balance) as total_wallet_balance FROM users',
-        'SELECT SUM(glo_coin_balance) as total_glo_coins FROM users'
+        'SELECT SUM(amount) as total_revenue FROM orders WHERE status IN ("SUCCESS", "CHARGED")',
+        'SELECT COUNT(*) as successful_orders FROM orders WHERE status IN ("SUCCESS", "CHARGED")',
+        'SELECT COUNT(*) as pending_orders FROM orders WHERE status IN ("CREATED", "PENDING")',
+        'SELECT COUNT(*) as failed_orders FROM orders WHERE status IN ("AUTHORIZATION_FAILED", "FAILED")',
+        'SELECT COUNT(*) as juspay_orders FROM orders WHERE order_id LIKE "JUSPAY_%"',
+        'SELECT COUNT(*) as cashfree_orders FROM orders WHERE order_id LIKE "CF_%"',
+        'SELECT COUNT(*) as glocoin_orders FROM orders WHERE order_id LIKE "GLOCOIN_%"'
     ];
     
     Promise.all(queries.map(query => new Promise((resolve, reject) => {
@@ -1298,20 +1455,30 @@ app.get('/api/admin/stats', requireSuperAdmin, (req, res) => {
             else resolve(result);
         });
     }))).then(results => {
+        const totalOrders = results[1].total_orders || 0;
+        const successfulOrders = results[3].successful_orders || 0;
+        const successRate = totalOrders > 0 ? (successfulOrders / totalOrders * 100).toFixed(1) : 0;
+        
         res.json({
             success: true,
-            stats: {
-                total_users: results[0].total_users,
-                total_orders: results[1].total_orders,
-                total_revenue: (results[2].total_revenue || 0) / 100, // Convert back to main currency unit
-                total_wallet_balance: results[3].total_wallet_balance || 0,
-                total_glo_coins: results[4].total_glo_coins || 0,
-                current_gateway: paymentManager.getActiveGatewayName()
-            }
+            total_users: results[0].total_users || 0,
+            total_orders: totalOrders,
+            total_revenue: (results[2].total_revenue || 0),
+            successful_orders: successfulOrders,
+            pending_orders: results[4].pending_orders || 0,
+            failed_orders: results[5].failed_orders || 0,
+            success_rate: parseFloat(successRate),
+            active_users: results[0].total_users || 0, // Simplified for now
+            gateway_breakdown: {
+                juspay: results[6].juspay_orders || 0,
+                cashfree: results[7].cashfree_orders || 0,
+                glocoin: results[8].glocoin_orders || 0
+            },
+            current_gateway: paymentManager.getActiveGatewayName()
         });
     }).catch(error => {
-        console.error('Error getting stats:', error.message);
-        res.status(500).json({ error: 'Failed to get platform statistics' });
+        console.error('Error getting analytics:', error.message);
+        res.status(500).json({ error: 'Failed to get platform analytics' });
     });
 });
 

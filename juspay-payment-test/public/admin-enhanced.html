@@ -741,25 +741,105 @@
 
         function loadActivity() {
             const activities = [
-                { text: 'New payment processed via JusPay', time: '2 minutes ago', type: 'success' },
-                { text: 'Cashfree gateway health check', time: '5 minutes ago', type: 'info' },
-                { text: 'User withdrawal completed', time: '10 minutes ago', type: 'success' },
-                { text: 'Gateway switched to Cashfree', time: '15 minutes ago', type: 'warning' },
-                { text: 'New user registration', time: '20 minutes ago', type: 'info' }
+                { 
+                    text: 'New payment processed via JusPay Payments', 
+                    time: '2 minutes ago', 
+                    type: 'success',
+                    gateway: 'JusPay'
+                },
+                { 
+                    text: 'Cashfree Payments gateway health check', 
+                    time: '5 minutes ago', 
+                    type: 'info',
+                    gateway: 'Cashfree'
+                },
+                { 
+                    text: 'User withdrawal completed via GloCoin Wallet', 
+                    time: '10 minutes ago', 
+                    type: 'success',
+                    gateway: 'GloCoin'
+                },
+                { 
+                    text: 'Gateway switched from JusPay to Cashfree', 
+                    time: '15 minutes ago', 
+                    type: 'warning',
+                    gateway: 'System'
+                },
+                { 
+                    text: 'New user registration and wallet creation', 
+                    time: '20 minutes ago', 
+                    type: 'info',
+                    gateway: 'Platform'
+                }
             ];
             
             const activityFeed = document.getElementById('activityFeed');
-            activityFeed.innerHTML = activities.map(activity => `
-                <div class="activity-item">
-                    <div class="activity-icon activity-${activity.type}">
-                        ${activity.type === 'success' ? '✅' : activity.type === 'warning' ? '⚠️' : 'ℹ️'}
-                    </div>
-                    <div class="activity-info">
-                        <div class="activity-text">${activity.text}</div>
-                        <div class="activity-time">${activity.time}</div>
-                    </div>
-                </div>
-            `).join('');
+            
+            // Clear existing content
+            activityFeed.innerHTML = '';
+            
+            activities.forEach(activity => {
+                const activityItem = document.createElement('div');
+                activityItem.className = 'activity-item';
+                
+                const activityIcon = document.createElement('div');
+                activityIcon.className = `activity-icon activity-${activity.type}`;
+                activityIcon.textContent = activity.type === 'success' ? '✅' : activity.type === 'warning' ? '⚠️' : 'ℹ️';
+                
+                const activityInfo = document.createElement('div');
+                activityInfo.className = 'activity-info';
+                
+                const activityText = document.createElement('div');
+                activityText.className = 'activity-text';
+                activityText.textContent = activity.text;
+                
+                const activityTime = document.createElement('div');
+                activityTime.className = 'activity-time';
+                activityTime.textContent = activity.time;
+                
+                activityInfo.appendChild(activityText);
+                activityInfo.appendChild(activityTime);
+                
+                // Add gateway badge if applicable
+                if (activity.gateway && activity.gateway !== 'System' && activity.gateway !== 'Platform') {
+                    const gatewayColors = {
+                        'JusPay': '#667EEA',
+                        'Cashfree': '#00D2FF',
+                        'GloCoin': '#F59E0B'
+                    };
+                    const gatewayIcons = {
+                        'JusPay': '🏦',
+                        'Cashfree': '💳',
+                        'GloCoin': '🪙'
+                    };
+                    
+                    if (gatewayColors[activity.gateway]) {
+                        const gatewayContainer = document.createElement('div');
+                        gatewayContainer.style.marginTop = '4px';
+                        
+                        const gatewayBadge = document.createElement('span');
+                        gatewayBadge.style.cssText = `
+                            font-size: 0.65rem;
+                            background: ${gatewayColors[activity.gateway]}20;
+                            color: ${gatewayColors[activity.gateway]};
+                            padding: 2px 6px;
+                            border-radius: 4px;
+                            border: 1px solid ${gatewayColors[activity.gateway]}40;
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 2px;
+                        `;
+                        gatewayBadge.innerHTML = `${gatewayIcons[activity.gateway]} ${activity.gateway}`;
+                        
+                        gatewayContainer.appendChild(gatewayBadge);
+                        activityInfo.appendChild(gatewayContainer);
+                    }
+                }
+                
+                activityItem.appendChild(activityIcon);
+                activityItem.appendChild(activityInfo);
+                activityFeed.appendChild(activityItem);
+            });
         }
 
         function addActivityItem(text, type) {
