@@ -165,7 +165,63 @@ const db = new sqlite3.Database('./users.db', (err) => {
                         });
                     } else {
                         console.log('Demo user already exists');
+                    }
+                });
+                
+                // Create easy-to-use admin account (admin/admin123)
+                const easyAdminUsername = 'admin';
+                const easyAdminPassword = 'admin123';
+                
+                db.get('SELECT username FROM users WHERE username = ?', [easyAdminUsername], (err, row) => {
+                    if (err) {
+                        console.error('Error checking easy admin user:', err.message);
+                    } else if (!row) {
+                        bcrypt.hash(easyAdminPassword, 10, (err, hashedPassword) => {
+                            if (err) {
+                                console.error('Error hashing easy admin password:', err.message);
+                            } else {
+                                db.run('INSERT INTO users (username, email, password, role, wallet_balance, glo_coin_balance) VALUES (?, ?, ?, ?, ?, ?)', 
+                                    [easyAdminUsername, 'admin@glocoin.com', hashedPassword, 'superadmin', 1000000, 50000], 
+                                    function(err) {
+                                        if (err) {
+                                            console.error('Error creating easy admin user:', err.message);
+                                        } else {
+                                            console.log('Easy admin user created successfully (admin/admin123)');
+                                        }
+                                    });
                             }
+                        });
+                    } else {
+                        console.log('Easy admin user already exists');
+                    }
+                });
+                
+                // Create easy-to-use demo account (demo/demo123)
+                const easyDemoUsername = 'demo';
+                const easyDemoPassword = 'demo123';
+                
+                db.get('SELECT username FROM users WHERE username = ?', [easyDemoUsername], (err, row) => {
+                    if (err) {
+                        console.error('Error checking easy demo user:', err.message);
+                    } else if (!row) {
+                        bcrypt.hash(easyDemoPassword, 10, (err, hashedPassword) => {
+                            if (err) {
+                                console.error('Error hashing easy demo password:', err.message);
+                            } else {
+                                db.run('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', 
+                                    [easyDemoUsername, 'demo@glocoin.com', hashedPassword], 
+                                    function(err) {
+                                        if (err) {
+                                            console.error('Error creating easy demo user:', err.message);
+                                        } else {
+                                            console.log('Easy demo user created successfully (demo/demo123)');
+                                        }
+                                    });
+                            }
+                        });
+                    } else {
+                        console.log('Easy demo user already exists');
+                    }
                         });
                     }
                 });
@@ -784,14 +840,17 @@ app.post('/payment/create-order', async (req, res) => {
         const paymentSession = await paymentManager.createPaymentSession(orderData);
         
         // Store order in database
+        console.log(`💾 Storing order in database for user_id: ${userId}, order_id: ${orderData.order_id}`);
         db.run(`INSERT INTO orders (user_id, order_id, session_id, amount, currency, status, customer_id, juspay_response) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, 
             [userId, orderData.order_id, paymentSession.session_id, amount, currency, 'PENDING', orderData.customer_id, JSON.stringify(paymentSession)], 
             function(err) {
                 if (err) {
-                    console.error('Database error:', err.message);
+                    console.error('❌ Database error storing order:', err.message);
                     return res.status(500).json({ error: 'Database error' });
                 }
+                
+                console.log(`✅ Order stored successfully: ${orderData.order_id} for user ${userId}`);
                 
                 console.log('Order created with gateway:', paymentSession.gateway, 'Order ID:', orderData.order_id);
                 res.json({
@@ -951,12 +1010,24 @@ app.get('/payment/orders', (req, res) => {
     }
 
     const userId = req.session.user.id;
+    console.log(`🔍 Fetching recent orders for user_id: ${userId} (username: ${req.session.user.username})`);
     
     db.all('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT 20', 
         [userId], (err, orders) => {
             if (err) {
                 console.error('Database error:', err.message);
                 return res.status(500).json({ error: 'Database error' });
+            }
+            
+            console.log(`📋 Found ${orders ? orders.length : 0} orders for user ${userId}`);
+            if (orders && orders.length > 0) {
+                console.log('📊 Recent orders:', orders.map(o => ({
+                    order_id: o.order_id,
+                    amount: o.amount,
+                    status: o.status,
+                    type: o.transaction_type,
+                    created_at: o.created_at
+                })));
             }
             
             res.json({ 
