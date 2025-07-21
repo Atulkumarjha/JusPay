@@ -1027,51 +1027,111 @@
                     border-radius: 0.5rem;
                     border: 1px solid ${gatewayInfo.color}40;
                 `;
-                gatewaySection.innerHTML = `
-                    <p style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Payment Gateway</p>
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.2rem;">${gatewayInfo.icon}</span>
-                        <span style="color: #333; font-size: 1.1rem; font-weight: 600;">${gatewayInfo.display_name}</span>
-                    </div>
-                    <p style="margin: 0; color: #666; font-size: 0.85rem;">${gatewayInfo.description}</p>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
-                        <p style="margin: 0; color: #666; font-size: 0.75rem;"><strong>Environment:</strong> ${gatewayInfo.environment}</p>
-                        <p style="margin: 0; color: #666; font-size: 0.75rem;"><strong>Provider:</strong> ${gatewayInfo.provider}</p>
-                    </div>
-                `;
+                
+                // Create gateway content elements
+                const gatewayTitle = document.createElement('p');
+                gatewayTitle.style.cssText = 'margin: 0 0 0.5rem 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;';
+                gatewayTitle.textContent = 'Payment Gateway';
+                
+                const gatewayHeader = document.createElement('div');
+                gatewayHeader.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;';
+                
+                const gatewayIcon = document.createElement('span');
+                gatewayIcon.style.fontSize = '1.2rem';
+                gatewayIcon.textContent = gatewayInfo.icon;
+                
+                const gatewayName = document.createElement('span');
+                gatewayName.style.cssText = 'color: #333; font-size: 1.1rem; font-weight: 600;';
+                gatewayName.textContent = gatewayInfo.display_name;
+                
+                gatewayHeader.appendChild(gatewayIcon);
+                gatewayHeader.appendChild(gatewayName);
+                
+                const gatewayDesc = document.createElement('p');
+                gatewayDesc.style.cssText = 'margin: 0; color: #666; font-size: 0.85rem;';
+                gatewayDesc.textContent = gatewayInfo.description;
+                
+                const gatewayDetails = document.createElement('div');
+                gatewayDetails.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;';
+                
+                const envDetail = document.createElement('p');
+                envDetail.style.cssText = 'margin: 0; color: #666; font-size: 0.75rem;';
+                envDetail.innerHTML = `<strong>Environment:</strong> ${gatewayInfo.environment}`;
+                
+                const providerDetail = document.createElement('p');
+                providerDetail.style.cssText = 'margin: 0; color: #666; font-size: 0.75rem;';
+                providerDetail.innerHTML = `<strong>Provider:</strong> ${gatewayInfo.provider}`;
+                
+                gatewayDetails.appendChild(envDetail);
+                gatewayDetails.appendChild(providerDetail);
+                
+                gatewaySection.appendChild(gatewayTitle);
+                gatewaySection.appendChild(gatewayHeader);
+                gatewaySection.appendChild(gatewayDesc);
+                gatewaySection.appendChild(gatewayDetails);
                 
                 // Date section
                 const dateSection = document.createElement('div');
                 dateSection.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;';
                 
-                let dateHTML = `
-                    <div>
-                        <p style="margin: 0 0 0.25rem 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Created</p>
-                        <p style="margin: 0; color: #333; font-size: 0.9rem;">${createdDate.toLocaleDateString()}</p>
-                        <p style="margin: 0; color: #666; font-size: 0.8rem;">${createdDate.toLocaleTimeString()}</p>
-                    </div>
-                `;
+                // Create date section
+                const createdDiv = document.createElement('div');
+                
+                const createdLabel = document.createElement('p');
+                createdLabel.style.cssText = 'margin: 0 0 0.25rem 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;';
+                createdLabel.textContent = 'Created';
+                
+                const createdDateP = document.createElement('p');
+                createdDateP.style.cssText = 'margin: 0; color: #333; font-size: 0.9rem;';
+                createdDateP.textContent = createdDate.toLocaleDateString();
+                
+                const createdTimeP = document.createElement('p');
+                createdTimeP.style.cssText = 'margin: 0; color: #666; font-size: 0.8rem;';
+                createdTimeP.textContent = createdDate.toLocaleTimeString();
+                
+                createdDiv.appendChild(createdLabel);
+                createdDiv.appendChild(createdDateP);
+                createdDiv.appendChild(createdTimeP);
+                
+                dateSection.appendChild(createdDiv);
                 
                 if (updatedDate) {
-                    dateHTML += `
-                        <div>
-                            <p style="margin: 0 0 0.25rem 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Updated</p>
-                            <p style="margin: 0; color: #333; font-size: 0.9rem;">${updatedDate.toLocaleDateString()}</p>
-                            <p style="margin: 0; color: #666; font-size: 0.8rem;">${updatedDate.toLocaleTimeString()}</p>
-                        </div>
-                    `;
+                    const updatedDiv = document.createElement('div');
+                    
+                    const updatedLabel = document.createElement('p');
+                    updatedLabel.style.cssText = 'margin: 0 0 0.25rem 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;';
+                    updatedLabel.textContent = 'Updated';
+                    
+                    const updatedDateP = document.createElement('p');
+                    updatedDateP.style.cssText = 'margin: 0; color: #333; font-size: 0.9rem;';
+                    updatedDateP.textContent = updatedDate.toLocaleDateString();
+                    
+                    const updatedTimeP = document.createElement('p');
+                    updatedTimeP.style.cssText = 'margin: 0; color: #666; font-size: 0.8rem;';
+                    updatedTimeP.textContent = updatedDate.toLocaleTimeString();
+                    
+                    updatedDiv.appendChild(updatedLabel);
+                    updatedDiv.appendChild(updatedDateP);
+                    updatedDiv.appendChild(updatedTimeP);
+                    
+                    dateSection.appendChild(updatedDiv);
                 }
-                
-                dateSection.innerHTML = dateHTML;
                 
                 // Transaction ID section (if available)
                 if (transaction.transaction_id) {
                     const transactionIdSection = document.createElement('div');
                     transactionIdSection.style.cssText = 'background: #f8f9fa; padding: 1rem; border-radius: 0.5rem;';
-                    transactionIdSection.innerHTML = `
-                        <p style="margin: 0 0 0.25rem 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Transaction ID</p>
-                        <p style="margin: 0; color: #333; font-size: 0.9rem; font-family: monospace; word-break: break-all;">${transaction.transaction_id}</p>
-                    `;
+                    
+                    const idLabel = document.createElement('p');
+                    idLabel.style.cssText = 'margin: 0 0 0.25rem 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;';
+                    idLabel.textContent = 'Transaction ID';
+                    
+                    const idValue = document.createElement('p');
+                    idValue.style.cssText = 'margin: 0; color: #333; font-size: 0.9rem; font-family: monospace; word-break: break-all;';
+                    idValue.textContent = transaction.transaction_id;
+                    
+                    transactionIdSection.appendChild(idLabel);
+                    transactionIdSection.appendChild(idValue);
                     contentGrid.appendChild(transactionIdSection);
                 }
                 
@@ -1079,10 +1139,17 @@
                 if (transaction.transaction_type) {
                     const transactionTypeSection = document.createElement('div');
                     transactionTypeSection.style.cssText = 'background: #f8f9fa; padding: 1rem; border-radius: 0.5rem;';
-                    transactionTypeSection.innerHTML = `
-                        <p style="margin: 0 0 0.25rem 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Transaction Type</p>
-                        <p style="margin: 0; color: #333; font-size: 0.9rem;">${transaction.transaction_type}</p>
-                    `;
+                    
+                    const typeLabel = document.createElement('p');
+                    typeLabel.style.cssText = 'margin: 0 0 0.25rem 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;';
+                    typeLabel.textContent = 'Transaction Type';
+                    
+                    const typeValue = document.createElement('p');
+                    typeValue.style.cssText = 'margin: 0; color: #333; font-size: 0.9rem;';
+                    typeValue.textContent = transaction.transaction_type;
+                    
+                    transactionTypeSection.appendChild(typeLabel);
+                    transactionTypeSection.appendChild(typeValue);
                     contentGrid.appendChild(transactionTypeSection);
                 }
                 
