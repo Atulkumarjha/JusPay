@@ -4,50 +4,504 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Gateway Platform - Login</title>
+    <link rel="stylesheet" href="modern-ui.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: 100vh;
+            position: relative;
         }
 
         .login-container {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 50px rgba(31, 38, 135, 0.3);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
             width: 100%;
-            max-width: 400px;
+            max-width: 480px;
+            animation: scaleIn 0.6s ease-out;
+            position: relative;
+            overflow: hidden;
         }
 
-        .logo {
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+        }
+
+        .logo-section {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: var(--space-xl);
+            animation: slideInDown 0.8s ease-out 0.2s both;
         }
 
-        .logo h1 {
-            color: #333;
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--primary-gradient);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--space-md);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .logo-icon svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+
+        .platform-title {
             font-size: 2rem;
-            margin-bottom: 0.5rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-xs);
+            letter-spacing: -0.02em;
         }
 
-        .logo p {
-            color: #666;
-            font-size: 0.9rem;
+        .platform-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: var(--space-lg);
+        }
+
+        .form-section {
+            animation: slideInUp 0.8s ease-out 0.4s both;
         }
 
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: var(--space-md);
+            position: relative;
         }
+
+        .form-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1rem;
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-normal);
+            width: 100%;
+            min-height: 52px;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(102, 126, 234, 0.8);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: var(--space-md);
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.6);
+            pointer-events: none;
+        }
+
+        .btn-login {
+            width: 100%;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            margin: var(--space-lg) 0;
+            min-height: 52px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-login:hover::before {
+            left: 100%;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: var(--space-lg) 0;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.875rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .divider span {
+            padding: 0 var(--space-md);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            padding: var(--space-xs) var(--space-md);
+        }
+
+        .quick-login {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-sm);
+            animation: fadeIn 1s ease-out 0.6s both;
+        }
+
+        .quick-btn {
+            padding: var(--space-sm);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-md);
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all var(--transition-normal);
+            backdrop-filter: blur(10px);
+        }
+
+        .quick-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: var(--space-lg);
+            animation: fadeIn 1s ease-out 0.8s both;
+        }
+
+        .register-link a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color var(--transition-normal);
+        }
+
+        .register-link a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+        .features-grid {
+            position: absolute;
+            top: var(--space-lg);
+            right: var(--space-lg);
+            display: grid;
+            gap: var(--space-sm);
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: var(--space-sm);
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            white-space: nowrap;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .feature-item:nth-child(2) {
+            animation-delay: 1s;
+        }
+
+        .feature-item:nth-child(3) {
+            animation-delay: 2s;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                margin: var(--space-md);
+                padding: var(--space-lg);
+            }
+            
+            .platform-title {
+                font-size: 1.75rem;
+            }
+            
+            .quick-login {
+                grid-template-columns: 1fr;
+            }
+            
+            .features-grid {
+                display: none;
+            }
+        }
+
+        .error-message {
+            background: rgba(245, 101, 101, 0.2);
+            border: 1px solid rgba(245, 101, 101, 0.3);
+            color: #fff;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-md);
+            display: none;
+            animation: slideInDown 0.3s ease-out;
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .loading .btn-login::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: var(--space-xs);
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="features-grid">
+        <div class="feature-item">🔒 Secure Payments</div>
+        <div class="feature-item">⚡ Dual Gateway</div>
+        <div class="feature-item">📊 Real-time Analytics</div>
+    </div>
+
+    <div class="login-container">
+        <div class="logo-section">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+            </div>
+            <h1 class="platform-title">Payment Gateway</h1>
+            <p class="platform-subtitle">Dual Gateway Integration Platform</p>
+        </div>
+
+        <div class="form-section">
+            <div class="error-message" id="errorMessage"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <div style="position: relative;">
+                        <input type="text" class="form-control" id="username" name="username" 
+                               placeholder="Enter your username" required>
+                        <div class="input-icon">👤</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div style="position: relative;">
+                        <input type="password" class="form-control" id="password" name="password" 
+                               placeholder="Enter your password" required>
+                        <div class="input-icon">🔒</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    Sign In to Platform
+                </button>
+            </form>
+
+            <div class="divider">
+                <span>Quick Access</span>
+            </div>
+
+            <div class="quick-login">
+                <button class="quick-btn" onclick="quickLogin('admin', 'admin123')">
+                    🔧 Admin Panel
+                </button>
+                <button class="quick-btn" onclick="quickLogin('demo', 'demo123')">
+                    👤 Demo User
+                </button>
+            </div>
+
+            <div class="register-link">
+                <p>Need an account? <a href="/register">Create Account</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced login functionality
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleLogin();
+        });
+
+        async function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showError('Please enter both username and password');
+                return;
+            }
+
+            setLoading(true);
+            hideError();
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+                });
+
+                if (response.ok) {
+                    // Success - redirect will happen automatically
+                    document.body.style.opacity = '0.8';
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                } else {
+                    const errorText = await response.text();
+                    showError('Invalid username or password');
+                }
+            } catch (error) {
+                showError('Connection error. Please try again.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function quickLogin(username, password) {
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = password;
+            
+            // Add visual feedback
+            const quickBtns = document.querySelectorAll('.quick-btn');
+            quickBtns.forEach(btn => btn.style.opacity = '0.5');
+            
+            setTimeout(() => {
+                handleLogin();
+            }, 300);
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+
+        function setLoading(loading) {
+            const container = document.querySelector('.login-container');
+            if (loading) {
+                container.classList.add('loading');
+            } else {
+                container.classList.remove('loading');
+            }
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '1':
+                        e.preventDefault();
+                        quickLogin('admin', 'admin123');
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        quickLogin('demo', 'demo123');
+                        break;
+                }
+            }
+        });
+
+        // Add focus animation
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
 
         label {
             display: block;

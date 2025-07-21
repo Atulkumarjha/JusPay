@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gateway Management Dashboard - Super Admin Panel</title>
+    <link rel="stylesheet" href="modern-ui.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .admin-dashboard {
+            min-height: 100vh;
+            background: var(--primary-gradient);
+        }
+
+        .admin-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: var(--space-md) 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--space-lg);
+        }
+
+        .admin-title {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            color: white;
+        }
+
+        .admin-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--success-gradient);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .admin-title h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #fff, #e0e7ff, #c7d2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .admin-title .subtitle {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .user-badge {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-lg);
+            color: white;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-xl) var(--space-lg);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-xl);
+            margin-bottom: var(--space-xl);
+        }
+
+        .gateway-section {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-medium);
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gateway-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+        }
+
+        .gateway-section:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-strong);
+        }
+
+        .gateway-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-lg);
+        }
+
+        .gateway-title {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .gateway-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .juspay-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .cashfree-icon {
+            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+        }
+
+        .gateway-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+        }
+
+        .gateway-status {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            padding: var(--space-xs) var(--space-md);
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-active {
+            background: rgba(72, 187, 120, 0.2);
+            color: #2f855a;
+            border: 1px solid rgba(72, 187, 120, 0.3);
+        }
+
+        .status-inactive {
+            background: rgba(160, 174, 192, 0.2);
+            color: #4a5568;
+            border: 1px solid rgba(160, 174, 192, 0.3);
+        }
+
+        .gateway-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            backdrop-filter: blur(10px);
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: var(--space-xs);
+        }
+
+        .info-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: white;
+            font-family: var(--font-mono);
+        }
+
+        .gateway-toggle {
+            width: 100%;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .gateway-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .gateway-toggle:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 80px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .toggle-switch.active {
+            background: var(--success-gradient);
+            border-color: rgba(72, 187, 120, 0.5);
+        }
+
+        .toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            transition: all var(--transition-normal);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active .toggle-knob {
+            transform: translateX(40px);
+        }
+
+        .analytics-section {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-medium);
+            margin-bottom: var(--space-xl);
+        }
+
+        .analytics-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            margin-bottom: var(--space-lg);
+        }
+
+        .analytics-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-md);
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: var(--space-lg);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            transition: all var(--transition-normal);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: var(--space-xs);
+            font-family: var(--font-mono);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .activity-feed {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .activity-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            margin-bottom: var(--space-lg);
+        }
+
+        .activity-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-sm);
+            transition: all var(--transition-normal);
+        }
+
+        .activity-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .activity-success {
+            background: var(--success-gradient);
+        }
+
+        .activity-warning {
+            background: var(--warning-gradient);
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-text {
+            color: white;
+            font-weight: 500;
+            margin-bottom: var(--space-xs);
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-family: var(--font-mono);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-lg);
+            }
+            
+            .gateway-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: var(--space-md);
+                text-align: center;
+            }
+            
+            .main-content {
+                padding: var(--space-lg) var(--space-md);
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: var(--space-lg);
+            right: var(--space-lg);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-medium);
+            border-left: 4px solid var(--primary-gradient);
+            z-index: 9999;
+            transform: translateX(400px);
+            transition: all var(--transition-normal);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left-color: #48bb78;
+        }
+
+        .notification.error {
+            border-left-color: #f56565;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-dashboard">
+        <header class="admin-header">
+            <div class="header-content">
+                <div class="admin-title">
+                    <div class="admin-icon">
+                        🛡️
+                    </div>
+                    <div>
+                        <h1>Gateway Management</h1>
+                        <div class="subtitle">Super Admin Dashboard</div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="user-badge">
+                        👤 <span id="adminUsername">Admin</span>
+                    </div>
+                    <button class="btn btn-error btn-sm" onclick="logout()">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="dashboard-grid">
+                <!-- JusPay Gateway Section -->
+                <div class="gateway-section animate-slide-up">
+                    <div class="gateway-header">
+                        <div class="gateway-title">
+                            <div class="gateway-icon juspay-icon">JP</div>
+                            <div>
+                                <h2 class="gateway-name">JusPay</h2>
+                                <div class="gateway-status status-active" id="juspayStatus">
+                                    <div class="pulse"></div>
+                                    ACTIVE
+                                </div>
+                            </div>
+                        </div>
+                        <div class="toggle-switch" id="juspayToggle" onclick="toggleGateway('juspay')">
+                            <div class="toggle-knob"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="gateway-info">
+                        <div class="info-item">
+                            <div class="info-label">Environment</div>
+                            <div class="info-value">Sandbox</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Merchant ID</div>
+                            <div class="info-value">blowtrumpet</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Base URL</div>
+                            <div class="info-value">sandbox.juspay.in</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+                            <div class="info-value">✅ Connected</div>
+                        </div>
+                    </div>
+                    
+                    <button class="gateway-toggle" onclick="activateGateway('juspay')" id="juspayButton">
+                        Activate JusPay Gateway
+                    </button>
+                </div>
+
+                <!-- Cashfree Gateway Section -->
+                <div class="gateway-section animate-slide-up" style="animation-delay: 0.2s;">
+                    <div class="gateway-header">
+                        <div class="gateway-title">
+                            <div class="gateway-icon cashfree-icon">CF</div>
+                            <div>
+                                <h2 class="gateway-name">Cashfree</h2>
+                                <div class="gateway-status status-inactive" id="cashfreeStatus">
+                                    <div class="pulse"></div>
+                                    MOCK MODE
+                                </div>
+                            </div>
+                        </div>
+                        <div class="toggle-switch" id="cashfreeToggle" onclick="toggleGateway('cashfree')">
+                            <div class="toggle-knob"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="gateway-info">
+                        <div class="info-item">
+                            <div class="info-label">Environment</div>
+                            <div class="info-value">Mock</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">App ID</div>
+                            <div class="info-value">MOCK_APP_ID</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Base URL</div>
+                            <div class="info-value">sandbox.cashfree.com</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+                            <div class="info-value">⚠️ Mock Mode</div>
+                        </div>
+                    </div>
+                    
+                    <button class="gateway-toggle" onclick="activateGateway('cashfree')" id="cashfreeButton">
+                        Activate Cashfree Gateway
+                    </button>
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div class="analytics-section animate-fade-in" style="animation-delay: 0.4s;">
+                <div class="analytics-header">
+                    <h2 class="analytics-title">📊 Platform Analytics</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalOrders">Loading...</div>
+                        <div class="stat-label">Total Orders</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalRevenue">Loading...</div>
+                        <div class="stat-label">Total Revenue</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="activeUsers">Loading...</div>
+                        <div class="stat-label">Active Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="successRate">Loading...</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Feed -->
+            <div class="activity-feed animate-fade-in" style="animation-delay: 0.6s;">
+                <div class="activity-header">
+                    <h2 class="activity-title">📈 Recent Activity</h2>
+                </div>
+                <div id="activityFeed">
+                    <!-- Activity items will be populated by JavaScript -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="notification" id="notification">
+        <div id="notificationMessage"></div>
+    </div>
+
+    <script>
+        let currentGateway = 'juspay';
+        let isLoading = false;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadGatewayStatus();
+            await loadAnalytics();
+            loadActivity();
+            
+            // Start real-time updates
+            setInterval(loadAnalytics, 30000); // Update every 30 seconds
+            setInterval(loadActivity, 10000);  // Update activity every 10 seconds
+        });
+
+        async function loadGatewayStatus() {
+            try {
+                const response = await fetch('/admin/gateway-status');
+                const data = await response.json();
+                
+                currentGateway = data.active_gateway;
+                updateGatewayUI();
+            } catch (error) {
+                console.error('Error loading gateway status:', error);
+            }
+        }
+
+        function updateGatewayUI() {
+            const juspayToggle = document.getElementById('juspayToggle');
+            const cashfreeToggle = document.getElementById('cashfreeToggle');
+            const juspayButton = document.getElementById('juspayButton');
+            const cashfreeButton = document.getElementById('cashfreeButton');
+            const juspayStatus = document.getElementById('juspayStatus');
+            const cashfreeStatus = document.getElementById('cashfreeStatus');
+
+            // Reset all
+            juspayToggle.classList.remove('active');
+            cashfreeToggle.classList.remove('active');
+            juspayStatus.className = 'gateway-status status-inactive';
+            cashfreeStatus.className = 'gateway-status status-inactive';
+
+            if (currentGateway === 'juspay') {
+                juspayToggle.classList.add('active');
+                juspayStatus.className = 'gateway-status status-active';
+                juspayStatus.innerHTML = '<div class="pulse"></div>ACTIVE';
+                juspayButton.textContent = 'Currently Active';
+                juspayButton.disabled = true;
+                cashfreeButton.textContent = 'Activate Cashfree Gateway';
+                cashfreeButton.disabled = false;
+                cashfreeStatus.innerHTML = '<div class="pulse"></div>STANDBY';
+            } else {
+                cashfreeToggle.classList.add('active');
+                cashfreeStatus.className = 'gateway-status status-active';
+                cashfreeStatus.innerHTML = '<div class="pulse"></div>ACTIVE';
+                cashfreeButton.textContent = 'Currently Active';
+                cashfreeButton.disabled = true;
+                juspayButton.textContent = 'Activate JusPay Gateway';
+                juspayButton.disabled = false;
+                juspayStatus.innerHTML = '<div class="pulse"></div>STANDBY';
+            }
+        }
+
+        async function activateGateway(gateway) {
+            if (isLoading || currentGateway === gateway) return;
+            
+            isLoading = true;
+            showNotification(`Switching to ${gateway.toUpperCase()}...`, 'info');
+            
+            try {
+                const response = await fetch('/admin/switch-gateway', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ gateway: gateway })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentGateway = gateway;
+                    updateGatewayUI();
+                    showNotification(`Successfully switched to ${gateway.toUpperCase()}!`, 'success');
+                    addActivityItem(`Gateway switched to ${gateway.toUpperCase()}`, 'success');
+                } else {
+                    showNotification('Failed to switch gateway', 'error');
+                }
+            } catch (error) {
+                console.error('Error switching gateway:', error);
+                showNotification('Error switching gateway', 'error');
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        function toggleGateway(gateway) {
+            if (currentGateway !== gateway) {
+                activateGateway(gateway);
+            }
+        }
+
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('/admin/analytics');
+                const data = await response.json();
+                
+                document.getElementById('totalOrders').textContent = data.total_orders || '0';
+                document.getElementById('totalRevenue').textContent = `₹${(data.total_revenue || 0).toLocaleString()}`;
+                document.getElementById('activeUsers').textContent = data.active_users || '0';
+                document.getElementById('successRate').textContent = `${data.success_rate || 0}%`;
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        function loadActivity() {
+            const activities = [
+                { text: 'New payment processed via JusPay', time: '2 minutes ago', type: 'success' },
+                { text: 'Cashfree gateway health check', time: '5 minutes ago', type: 'info' },
+                { text: 'User withdrawal completed', time: '10 minutes ago', type: 'success' },
+                { text: 'Gateway switched to Cashfree', time: '15 minutes ago', type: 'warning' },
+                { text: 'New user registration', time: '20 minutes ago', type: 'info' }
+            ];
+            
+            const activityFeed = document.getElementById('activityFeed');
+            activityFeed.innerHTML = activities.map(activity => `
+                <div class="activity-item">
+                    <div class="activity-icon activity-${activity.type}">
+                        ${activity.type === 'success' ? '✅' : activity.type === 'warning' ? '⚠️' : 'ℹ️'}
+                    </div>
+                    <div class="activity-info">
+                        <div class="activity-text">${activity.text}</div>
+                        <div class="activity-time">${activity.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addActivityItem(text, type) {
+            const activityFeed = document.getElementById('activityFeed');
+            const newItem = document.createElement('div');
+            newItem.className = 'activity-item';
+            newItem.innerHTML = `
+                <div class="activity-icon activity-${type}">
+                    ${type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️'}
+                </div>
+                <div class="activity-info">
+                    <div class="activity-text">${text}</div>
+                    <div class="activity-time">Just now</div>
+                </div>
+            `;
+            activityFeed.insertBefore(newItem, activityFeed.firstChild);
+            
+            // Remove last item if more than 5
+            if (activityFeed.children.length > 5) {
+                activityFeed.removeChild(activityFeed.lastChild);
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const messageElement = document.getElementById('notificationMessage');
+            
+            messageElement.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        async function logout() {
+            try {
+                await fetch('/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+    </script>
+</body>
+</html>

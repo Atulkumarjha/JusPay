@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GloCoin Payment Platform - Digital Payments Made Simple</title>
+    <link rel="stylesheet" href="modern-ui.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .glocoin-platform {
+            min-height: 100vh;
+            background: var(--primary-gradient);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .platform-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: var(--space-md) 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--space-lg);
+        }
+
+        .platform-brand {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .brand-logo {
+            width: 60px;
+            height: 60px;
+            background: var(--accent-gradient);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.4);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .brand-info h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #fbbf24, #f59e0b, #d97706);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .brand-tagline {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-normal);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .user-badge {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-lg);
+            color: white;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-xl) var(--space-lg);
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .welcome-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(45deg, #fff, #e0e7ff, #c7d2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto var(--space-lg);
+            line-height: 1.6;
+        }
+
+        .payment-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: var(--space-xl);
+            margin-bottom: var(--space-xl);
+        }
+
+        .payment-section {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-medium);
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .section-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--success-gradient);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 8px 20px rgba(72, 187, 120, 0.3);
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+        }
+
+        .payment-form {
+            display: grid;
+            gap: var(--space-lg);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-md);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-input {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            transition: all var(--transition-normal);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(251, 191, 36, 0.6);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .amount-input {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            font-family: var(--font-mono);
+        }
+
+        .gateway-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+
+        .gateway-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            text-align: center;
+            position: relative;
+        }
+
+        .gateway-option:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .gateway-option.selected {
+            border-color: var(--accent-color);
+            background: rgba(251, 191, 36, 0.2);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+
+        .gateway-logo {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-gradient);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--space-md);
+            font-weight: bold;
+            color: white;
+        }
+
+        .gateway-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: var(--space-xs);
+        }
+
+        .gateway-status {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .payment-button {
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            padding: var(--space-lg) var(--space-xl);
+            border-radius: var(--radius-lg);
+            font-size: 1.125rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.4);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .payment-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(251, 191, 36, 0.6);
+        }
+
+        .payment-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .stats-sidebar {
+            animation: slideInRight 0.8s ease-out;
+        }
+
+        .stats-card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-medium);
+            margin-bottom: var(--space-lg);
+        }
+
+        .balance-display {
+            text-align: center;
+            margin-bottom: var(--space-lg);
+        }
+
+        .balance-label {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: var(--space-sm);
+        }
+
+        .balance-amount {
+            font-size: 3rem;
+            font-weight: 800;
+            color: white;
+            font-family: var(--font-mono);
+            background: linear-gradient(45deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .quick-actions {
+            display: grid;
+            gap: var(--space-md);
+        }
+
+        .quick-action {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .quick-action:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(5px);
+        }
+
+        .transactions-history {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-medium);
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            padding: var(--space-md);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-sm);
+            transition: all var(--transition-normal);
+        }
+
+        .transaction-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .transaction-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: var(--space-md);
+        }
+
+        .transaction-success {
+            background: var(--success-gradient);
+        }
+
+        .transaction-pending {
+            background: var(--warning-gradient);
+        }
+
+        .transaction-info {
+            flex: 1;
+        }
+
+        .transaction-title {
+            color: white;
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+        }
+
+        .transaction-details {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-family: var(--font-mono);
+        }
+
+        .transaction-amount {
+            color: white;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            font-size: 1.125rem;
+        }
+
+        @media (max-width: 1024px) {
+            .payment-dashboard {
+                grid-template-columns: 1fr;
+                gap: var(--space-lg);
+            }
+            
+            .stats-sidebar {
+                order: -1;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .gateway-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: var(--space-md);
+                text-align: center;
+            }
+            
+            .header-nav {
+                order: -1;
+            }
+            
+            .main-container {
+                padding: var(--space-lg) var(--space-md);
+            }
+            
+            .welcome-title {
+                font-size: 2rem;
+            }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-content {
+            background: rgba(255, 255, 255, 0.9);
+            padding: var(--space-xl);
+            border-radius: var(--radius-xl);
+            text-align: center;
+            box-shadow: var(--shadow-strong);
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-left: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto var(--space-md);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="glocoin-platform">
+        <header class="platform-header">
+            <div class="header-content">
+                <div class="platform-brand">
+                    <div class="brand-logo">🌟</div>
+                    <div class="brand-info">
+                        <h1>GloCoin</h1>
+                        <div class="brand-tagline">Digital Payments Made Simple</div>
+                    </div>
+                </div>
+                
+                <nav class="header-nav">
+                    <a href="#" class="nav-link active">Payments</a>
+                    <a href="#" class="nav-link">History</a>
+                    <a href="#" class="nav-link">Analytics</a>
+                    <a href="/dashboard" class="nav-link">Dashboard</a>
+                </nav>
+                
+                <div class="user-profile">
+                    <div class="user-badge">
+                        👤 <span id="currentUser">User</span>
+                    </div>
+                    <button class="btn btn-error btn-sm" onclick="logout()">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-container">
+            <section class="welcome-section">
+                <h1 class="welcome-title">Send Money Instantly</h1>
+                <p class="welcome-subtitle">
+                    Experience seamless digital payments with our secure, fast, and reliable platform. 
+                    Choose your preferred gateway and send money with confidence.
+                </p>
+            </section>
+
+            <div class="payment-dashboard">
+                <div class="payment-section">
+                    <div class="section-header">
+                        <div class="section-icon">💰</div>
+                        <h2 class="section-title">Make Payment</h2>
+                    </div>
+
+                    <form class="payment-form" id="paymentForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Recipient Name</label>
+                                <input type="text" class="form-input" id="recipientName" placeholder="Enter recipient name" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" class="form-input" id="phoneNumber" placeholder="+91 9876543210" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">Amount (₹)</label>
+                            <input type="number" class="form-input amount-input" id="amount" placeholder="0.00" min="1" max="100000" required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">Description (Optional)</label>
+                            <input type="text" class="form-input" id="description" placeholder="Payment for...">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">Select Payment Gateway</label>
+                            <div class="gateway-selector">
+                                <div class="gateway-option selected" data-gateway="juspay" onclick="selectGateway('juspay')">
+                                    <div class="gateway-logo">JP</div>
+                                    <div class="gateway-name">JusPay</div>
+                                    <div class="gateway-status">Recommended</div>
+                                </div>
+                                <div class="gateway-option" data-gateway="cashfree" onclick="selectGateway('cashfree')">
+                                    <div class="gateway-logo">CF</div>
+                                    <div class="gateway-name">Cashfree</div>
+                                    <div class="gateway-status">Mock Mode</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="payment-button" id="paymentButton">
+                            🚀 Send Payment
+                        </button>
+                    </form>
+                </div>
+
+                <aside class="stats-sidebar">
+                    <div class="stats-card">
+                        <div class="balance-display">
+                            <div class="balance-label">Available Balance</div>
+                            <div class="balance-amount" id="userBalance">₹25,000</div>
+                        </div>
+                        
+                        <div class="quick-actions">
+                            <button class="quick-action" onclick="showAddMoney()">
+                                ➕ Add Money
+                            </button>
+                            <button class="quick-action" onclick="showWithdraw()">
+                                💸 Withdraw
+                            </button>
+                            <button class="quick-action" onclick="showTransactionHistory()">
+                                📊 View History
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <div class="section-header">
+                            <div class="section-icon">⚡</div>
+                            <h3 class="section-title" style="font-size: 1.25rem;">Quick Stats</h3>
+                        </div>
+                        
+                        <div class="quick-stats">
+                            <div class="stat-item" style="display: flex; justify-content: space-between; margin-bottom: var(--space-md); color: white;">
+                                <span>Today's Transactions</span>
+                                <strong id="todayTransactions">5</strong>
+                            </div>
+                            <div class="stat-item" style="display: flex; justify-content: space-between; margin-bottom: var(--space-md); color: white;">
+                                <span>This Month</span>
+                                <strong id="monthTransactions">₹15,750</strong>
+                            </div>
+                            <div class="stat-item" style="display: flex; justify-content: space-between; color: white;">
+                                <span>Success Rate</span>
+                                <strong id="successRate">98.5%</strong>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <section class="transactions-history">
+                <div class="section-header">
+                    <div class="section-icon">📋</div>
+                    <h2 class="section-title">Recent Transactions</h2>
+                </div>
+                
+                <div id="transactionsList">
+                    <!-- Transactions will be loaded here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h3 style="margin: 0; color: var(--primary-color);">Processing Payment...</h3>
+            <p style="color: #666; margin-top: var(--space-sm);">Please wait while we securely process your transaction</p>
+        </div>
+    </div>
+
+    <script>
+        let selectedGateway = 'juspay';
+        let isProcessing = false;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserData();
+            loadTransactions();
+            setupFormValidation();
+        });
+
+        function loadUserData() {
+            // Get username from storage or session
+            const username = localStorage.getItem('username') || 'User';
+            document.getElementById('currentUser').textContent = username;
+        }
+
+        async function loadTransactions() {
+            try {
+                const response = await fetch('/orders');
+                const orders = await response.json();
+                
+                const transactionsList = document.getElementById('transactionsList');
+                
+                if (orders.length === 0) {
+                    transactionsList.innerHTML = `
+                        <div style="text-align: center; padding: var(--space-xl); color: rgba(255, 255, 255, 0.7);">
+                            <div style="font-size: 3rem; margin-bottom: var(--space-md);">💳</div>
+                            <h3>No transactions yet</h3>
+                            <p>Your payment history will appear here</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                transactionsList.innerHTML = orders.slice(0, 5).map(order => {
+                    const isSuccess = order.status === 'CHARGED' || order.status === 'SUCCESS';
+                    const icon = isSuccess ? '✅' : '⏳';
+                    const iconClass = isSuccess ? 'transaction-success' : 'transaction-pending';
+                    
+                    return `
+                        <div class="transaction-item">
+                            <div class="transaction-icon ${iconClass}">${icon}</div>
+                            <div class="transaction-info">
+                                <div class="transaction-title">Payment #${order.order_id}</div>
+                                <div class="transaction-details">
+                                    ${new Date(order.created_at).toLocaleDateString()} • ${order.gateway.toUpperCase()}
+                                </div>
+                            </div>
+                            <div class="transaction-amount">₹${order.amount}</div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+            }
+        }
+
+        function selectGateway(gateway) {
+            selectedGateway = gateway;
+            
+            // Update UI
+            document.querySelectorAll('.gateway-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector(`[data-gateway="${gateway}"]`).classList.add('selected');
+        }
+
+        function setupFormValidation() {
+            const form = document.getElementById('paymentForm');
+            const amountInput = document.getElementById('amount');
+            const phoneInput = document.getElementById('phoneNumber');
+            
+            amountInput.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                if (value > 100000) {
+                    e.target.value = 100000;
+                }
+            });
+            
+            phoneInput.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 10) {
+                    value = value.slice(0, 10);
+                }
+                e.target.value = value;
+            });
+        }
+
+        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (isProcessing) return;
+            
+            const formData = {
+                amount: document.getElementById('amount').value,
+                customerName: document.getElementById('recipientName').value,
+                customerPhone: document.getElementById('phoneNumber').value,
+                description: document.getElementById('description').value || 'GloCoin Payment',
+                gateway: selectedGateway
+            };
+            
+            // Validation
+            if (!formData.amount || formData.amount < 1) {
+                showNotification('Please enter a valid amount', 'error');
+                return;
+            }
+            
+            if (!formData.customerName.trim()) {
+                showNotification('Please enter recipient name', 'error');
+                return;
+            }
+            
+            if (!formData.customerPhone || formData.customerPhone.length !== 10) {
+                showNotification('Please enter a valid 10-digit phone number', 'error');
+                return;
+            }
+            
+            await processPayment(formData);
+        });
+
+        async function processPayment(formData) {
+            isProcessing = true;
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const paymentButton = document.getElementById('paymentButton');
+            
+            // Show loading
+            loadingOverlay.classList.add('show');
+            paymentButton.disabled = true;
+            paymentButton.textContent = '⏳ Processing...';
+            
+            try {
+                const response = await fetch('/create-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Simulate processing time
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    showNotification('Payment initiated successfully!', 'success');
+                    
+                    // Reset form
+                    document.getElementById('paymentForm').reset();
+                    
+                    // Reload transactions
+                    await loadTransactions();
+                    
+                    // Redirect to payment URL if available
+                    if (result.payment_url) {
+                        setTimeout(() => {
+                            window.open(result.payment_url, '_blank');
+                        }, 1000);
+                    }
+                } else {
+                    showNotification(result.message || 'Payment failed', 'error');
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                showNotification('Payment processing failed', 'error');
+            } finally {
+                // Hide loading
+                loadingOverlay.classList.remove('show');
+                paymentButton.disabled = false;
+                paymentButton.textContent = '🚀 Send Payment';
+                isProcessing = false;
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: var(--space-lg);
+                right: var(--space-lg);
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                padding: var(--space-md) var(--space-lg);
+                border-radius: var(--radius-lg);
+                box-shadow: var(--shadow-medium);
+                border-left: 4px solid ${type === 'success' ? '#48bb78' : type === 'error' ? '#f56565' : '#667eea'};
+                z-index: 10000;
+                transform: translateX(400px);
+                transition: all var(--transition-normal);
+                color: #333;
+                font-weight: 600;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Hide notification
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        function showAddMoney() {
+            showNotification('Add Money feature coming soon!', 'info');
+        }
+
+        function showWithdraw() {
+            showNotification('Withdraw feature coming soon!', 'info');
+        }
+
+        function showTransactionHistory() {
+            window.location.href = '/dashboard';
+        }
+
+        async function logout() {
+            try {
+                await fetch('/logout', { method: 'POST' });
+                localStorage.removeItem('username');
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+    </script>
+</body>
+</html>
