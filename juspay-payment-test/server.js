@@ -330,7 +330,7 @@ function requireSuperAdmin(req, res, next) {
 // Routes
 app.get('/', (req, res) => {
     if (req.session.user) {
-        res.redirect('/dashboard');
+        res.redirect('/dashboard-enhanced');
     } else {
         res.sendFile(path.join(__dirname, 'public', 'login.html'));
     }
@@ -346,7 +346,7 @@ app.get('/register', (req, res) => {
 
 app.get('/dashboard', (req, res) => {
     if (req.session.user) {
-        res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+        res.redirect('/dashboard-enhanced');
     } else {
         res.redirect('/login');
     }
@@ -359,6 +359,88 @@ app.get('/glo-coin', (req, res) => {
     } else {
         res.redirect('/login');
     }
+});
+
+// Enhanced pages routes
+app.get('/dashboard-enhanced', (req, res) => {
+    if (req.session.user) {
+        res.sendFile(path.join(__dirname, 'public', 'dashboard-enhanced.html'));
+    } else {
+        res.redirect('/login');
+    }
+});
+
+app.get('/admin-enhanced', (req, res) => {
+    if (req.session.user && (req.session.user.role === 'admin' || req.session.user.role === 'superadmin')) {
+        res.sendFile(path.join(__dirname, 'public', 'admin-enhanced.html'));
+    } else if (req.session.user) {
+        res.redirect('/dashboard-enhanced');
+    } else {
+        res.redirect('/login');
+    }
+});
+
+app.get('/glo-coin-enhanced', (req, res) => {
+    if (req.session.user) {
+        res.sendFile(path.join(__dirname, 'public', 'glo-coin-enhanced.html'));
+    } else {
+        res.redirect('/login');
+    }
+});
+
+// Admin route (redirect to enhanced)
+app.get('/admin', (req, res) => {
+    if (req.session.user && (req.session.user.role === 'admin' || req.session.user.role === 'superadmin')) {
+        res.redirect('/admin-enhanced');
+    } else if (req.session.user) {
+        res.redirect('/dashboard-enhanced');
+    } else {
+        res.redirect('/login');
+    }
+});
+
+// API endpoint to get current user data
+app.get('/api/user', (req, res) => {
+    if (req.session.user) {
+        // Get updated user data from database
+        db.get('SELECT id, username, email, role, wallet_balance, glo_coin_balance, total_withdrawn FROM users WHERE id = ?', 
+            [req.session.user.id], (err, user) => {
+            if (err) {
+                console.error('Database error:', err.message);
+                return res.status(500).json({ error: 'Database error' });
+            }
+            
+            if (user) {
+                res.json({
+                    success: true,
+                    user: {
+                        id: user.id,
+                        username: user.username,
+                        email: user.email,
+                        role: user.role || 'user',
+                        wallet_balance: user.wallet_balance || 0,
+                        glo_coin_balance: user.glo_coin_balance || 0,
+                        total_withdrawn: user.total_withdrawn || 0
+                    }
+                });
+            } else {
+                res.status(401).json({ error: 'User not found' });
+            }
+        });
+    } else {
+        res.status(401).json({ error: 'Not authenticated' });
+    }
+});
+
+// Logout endpoint
+app.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Session destruction error:', err);
+            return res.status(500).json({ error: 'Could not log out' });
+        }
+        res.json({ success: true, message: 'Logged out successfully' });
+    });
 });
 
 // Login endpoint
@@ -393,8 +475,29 @@ app.post('/login', (req, res) => {
                     role: user.role || 'user'
                 };
                 
-                const redirectTo = user.role === 'superadmin' ? '/admin' : '/dashboard';
-                res.json({ success: true, message: 'Login successful', redirectTo: redirectTo });
+                // Check if request wants JSON response or redirect
+                if (req.headers.accept && req.headers.accept.includes('application/json')) {
+                    // Return user data for frontend redirection
+                    res.json({ 
+                        success: true, 
+                        message: 'Login successful', 
+                        user: {
+                            id: user.id,
+                            username: user.username,
+                            email: user.email,
+                            role: user.role || 'user',
+                            wallet_balance: user.wallet_balance || 0,
+                            glo_coin_balance: user.glo_coin_balance || 0
+                        }
+                    });
+                } else {
+                    // Redirect based on user role
+                    if (user.role === 'admin') {
+                        res.redirect('/admin-enhanced');
+                    } else {
+                        res.redirect('/dashboard-enhanced');
+                    }
+                }
             } else {
                 res.status(401).json({ error: 'Invalid username or password' });
             }

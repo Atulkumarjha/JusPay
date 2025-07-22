@@ -693,11 +693,34 @@
 
         async function loadUserData() {
             try {
-                // Get username from storage or session
-                const username = localStorage.getItem('username') || 'User';
-                document.getElementById('currentUser').textContent = username;
+                // First try to get user data from localStorage
+                const currentUserData = localStorage.getItem('currentUser');
+                if (currentUserData) {
+                    const user = JSON.parse(currentUserData);
+                    document.getElementById('currentUser').textContent = user.username || 'User';
+                    return;
+                }
+                
+                // If no localStorage data, fetch from server
+                const response = await fetch('/api/user');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        document.getElementById('currentUser').textContent = data.user.username || 'User';
+                        // Store for future use
+                        localStorage.setItem('currentUser', JSON.stringify(data.user));
+                    } else {
+                        // User not authenticated, redirect to login
+                        window.location.href = '/login.html';
+                    }
+                } else {
+                    // User not authenticated, redirect to login
+                    window.location.href = '/login.html';
+                }
             } catch (error) {
                 console.error('Error loading user data:', error);
+                // Fallback to login page
+                window.location.href = '/login.html';
             }
         }
 

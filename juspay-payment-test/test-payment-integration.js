@@ -37,9 +37,10 @@ async function testPaymentIntegration() {
         
         // Step 2: Create a payment order
         console.log('\n💳 Step 2: Creating payment order...');
-        const paymentResponse = await axios.post('http://localhost:3000/payment/create-order', {
-            amount: 100.50,
-            currency: 'INR'
+        const paymentResponse = await axios.post('http://localhost:3000/create-order', {
+            amount: 10050, // Amount in paisa (100.50 INR)
+            currency: 'INR',
+            customer_email: 'demo@example.com'
         }, {
             headers: {
                 'Cookie': sessionCookie,
@@ -51,7 +52,7 @@ async function testPaymentIntegration() {
         
         // Step 3: Check recent orders
         console.log('\n📋 Step 3: Fetching recent orders...');
-        const ordersResponse = await axios.get('http://localhost:3000/payment/orders', {
+        const ordersResponse = await axios.get('http://localhost:3000/orders', {
             headers: {
                 'Cookie': sessionCookie
             }
