@@ -105,17 +105,27 @@ class PaymentGatewayManager {
     // Get gateway-specific configuration for frontend
     getGatewayConfig() {
         const config = {
-            gateway: this.activeGateway,
-            name: this.activeGateway.charAt(0).toUpperCase() + this.activeGateway.slice(1)
+            active: this.activeGateway,
+            gateways: {}
         };
 
-        if (this.activeGateway === 'juspay') {
-            config.merchantId = process.env.JUSPAY_MERCHANT_ID;
-            config.baseUrl = process.env.JUSPAY_BASE_URL;
-            config.type = 'juspay';
-        } else if (this.activeGateway === 'razorpay') {
-            config.keyId = process.env.RAZORPAY_KEY_ID;
-            config.type = 'razorpay';
+        // Get configuration for each gateway
+        for (const [name, gateway] of Object.entries(this.gateways)) {
+            if (name === 'juspay') {
+                config.gateways[name] = {
+                    name: 'JusPay',
+                    status: gateway.merchantId && gateway.apiKey ? 'configured' : 'misconfigured',
+                    environment: gateway.environment || 'sandbox',
+                    active: name === this.activeGateway
+                };
+            } else if (name === 'cashfree') {
+                config.gateways[name] = {
+                    name: 'Cashfree',
+                    status: gateway.appId && gateway.secretKey ? 'configured' : 'mock',
+                    environment: gateway.environment || 'mock',
+                    active: name === this.activeGateway
+                };
+            }
         }
 
         return config;
@@ -135,12 +145,13 @@ class PaymentGatewayManager {
                         apiKey: gateway.apiKey ? 'configured' : 'missing',
                         active: name === this.activeGateway
                     };
-                } else if (name === 'razorpay') {
+                } else if (name === 'cashfree') {
                     results[name] = {
-                        status: gateway.keyId && gateway.keySecret ? 'healthy' : 'misconfigured',
-                        keyId: gateway.keyId ? 'configured' : 'missing',
-                        keySecret: gateway.keySecret ? 'configured' : 'missing',
-                        active: name === this.activeGateway
+                        status: gateway.appId ? 'healthy' : 'mock',
+                        appId: gateway.appId ? 'configured' : 'mock',
+                        secretKey: gateway.secretKey ? 'configured' : 'mock',
+                        active: name === this.activeGateway,
+                        mode: gateway.appId ? 'live' : 'mock'
                     };
                 }
             } catch (error) {

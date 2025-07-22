@@ -693,7 +693,7 @@
             showNotification(`Switching to ${gateway.toUpperCase()}...`, 'info');
             
             try {
-                const response = await fetch('/admin/switch-gateway', {
+                const response = await fetch('/api/admin/switch-gateway', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

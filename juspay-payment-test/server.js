@@ -599,6 +599,170 @@ app.get('/admin/gateway-status', requireSuperAdmin, async (req, res) => {
     }
 });
 
+// Switch payment gateway
+app.post('/api/admin/switch-gateway', requireSuperAdmin, (req, res) => {
+    try {
+        const { gateway } = req.body;
+        
+        if (!gateway) {
+            return res.status(400).json({ error: 'Gateway name is required' });
+        }
+        
+        const result = paymentManager.switchGateway(gateway);
+        
+        // Log the gateway switch
+        console.log(`🔄 Payment gateway switched by ${req.session.user.username} from ${result.previous} to ${result.current}`);
+        
+        res.json({
+            success: true,
+            message: `Payment gateway switched to ${gateway}`,
+            previous: result.previous,
+            current: result.current,
+            timestamp: result.timestamp
+        });
+    } catch (error) {
+        console.error('Error switching gateway:', error.message);
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Legacy endpoint for backward compatibility
+app.post('/admin/switch-gateway', requireSuperAdmin, (req, res) => {
+    // Redirect to new API endpoint
+    req.url = '/api/admin/switch-gateway';
+    app._router.handle(req, res);
+});
+
+// Get payment gateway status (API endpoint)
+app.get('/api/admin/payment-gateways', requireSuperAdmin, async (req, res) => {
+    try {
+        const gatewayInfo = paymentManager.getAvailableGateways();
+        const healthCheck = await paymentManager.healthCheck();
+        
+        res.json({
+            success: true,
+            current_gateway: gatewayInfo.current,
+            gateways: gatewayInfo.available,
+            health: healthCheck
+        });
+    } catch (error) {
+        console.error('Error getting gateway status:', error.message);
+        res.status(500).json({ error: 'Failed to get gateway status' });
+    }
+});
+
+// Get gateway configuration for frontend
+app.get('/api/admin/gateway-config', requireSuperAdmin, (req, res) => {
+    try {
+        const config = paymentManager.getGatewayConfig();
+        res.json({
+            success: true,
+            config: config
+        });
+    } catch (error) {
+        console.error('Error getting gateway config:', error.message);
+        res.status(500).json({ error: 'Failed to get gateway configuration' });
+    }
+});
+
+// Get all users (super admin only)
+app.get('/api/admin/users', requireSuperAdmin, (req, res) => {
+    db.all('SELECT id, username, email, role, wallet_balance, glo_coin_balance, total_withdrawn, created_at FROM users ORDER BY created_at DESC', (err, users) => {
+        if (err) {
+            console.error('Database error:', err.message);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        
+        res.json({
+            success: true,
+            users: users
+        });
+    });
+});
+
+// Get all orders with gateway information (super admin only)
+app.get('/api/admin/orders', requireSuperAdmin, (req, res) => {
+    db.all(`SELECT o.*, u.username 
+            FROM orders o 
+            LEFT JOIN users u ON o.user_id = u.id 
+            ORDER BY o.created_at DESC 
+            LIMIT 100`, (err, orders) => {
+        if (err) {
+            console.error('Database error:', err.message);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        
+        // Add gateway information to orders
+        const ordersWithGateway = orders.map(order => {
+            let gateway = 'unknown';
+            if (order.order_id.startsWith('JUSPAY_')) {
+                gateway = 'juspay';
+            } else if (order.order_id.startsWith('CF_')) {
+                gateway = 'cashfree';
+            }
+            
+            return {
+                ...order,
+                gateway: gateway,
+                gateway_display: gateway.charAt(0).toUpperCase() + gateway.slice(1),
+                gateway_info: getGatewayInfo(order.order_id)
+            };
+        });
+        
+        res.json({
+            success: true,
+            orders: ordersWithGateway
+        });
+    });
+});
+
+// Get platform analytics (super admin only)
+app.get('/admin/analytics', requireSuperAdmin, (req, res) => {
+    const queries = [
+        'SELECT COUNT(*) as total_users FROM users WHERE role != "superadmin"',
+        'SELECT COUNT(*) as total_orders FROM orders',
+        'SELECT SUM(amount) as total_revenue FROM orders WHERE status IN ("SUCCESS", "CHARGED")',
+        'SELECT COUNT(*) as successful_orders FROM orders WHERE status IN ("SUCCESS", "CHARGED")',
+        'SELECT COUNT(*) as pending_orders FROM orders WHERE status IN ("CREATED", "PENDING")',
+        'SELECT COUNT(*) as failed_orders FROM orders WHERE status IN ("AUTHORIZATION_FAILED", "FAILED")',
+        'SELECT COUNT(*) as juspay_orders FROM orders WHERE order_id LIKE "JUSPAY_%"',
+        'SELECT COUNT(*) as cashfree_orders FROM orders WHERE order_id LIKE "CF_%"',
+        'SELECT COUNT(*) as glocoin_orders FROM orders WHERE order_id LIKE "GLOCOIN_%"'
+    ];
+    
+    Promise.all(queries.map(query => new Promise((resolve, reject) => {
+        db.get(query, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
+    }))).then(results => {
+        const totalOrders = results[1].total_orders || 0;
+        const successfulOrders = results[3].successful_orders || 0;
+        const successRate = totalOrders > 0 ? (successfulOrders / totalOrders * 100).toFixed(1) : 0;
+        
+        res.json({
+            success: true,
+            total_users: results[0].total_users || 0,
+            total_orders: totalOrders,
+            total_revenue: (results[2].total_revenue || 0),
+            successful_orders: successfulOrders,
+            pending_orders: results[4].pending_orders || 0,
+            failed_orders: results[5].failed_orders || 0,
+            success_rate: parseFloat(successRate),
+            active_users: results[0].total_users || 0,
+            gateway_breakdown: {
+                juspay: results[6].juspay_orders || 0,
+                cashfree: results[7].cashfree_orders || 0,
+                glocoin: results[8].glocoin_orders || 0
+            },
+            current_gateway: paymentManager.getActiveGatewayName()
+        });
+    }).catch(error => {
+        console.error('Error getting analytics:', error.message);
+        res.status(500).json({ error: 'Failed to get platform analytics' });
+    });
+});
+
 // Utility functions
 function generateOrderId(gateway) {
     const timestamp = Date.now();
