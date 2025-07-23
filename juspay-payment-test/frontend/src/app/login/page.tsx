@@ -17,7 +17,7 @@ export default function LoginPage() {
     setLoading(true)
     
     try {
-      const response = await fetch('/login', {
+      const response = await fetch('http://localhost:8000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials)
@@ -26,17 +26,23 @@ export default function LoginPage() {
       const data = await response.json()
       
       if (data.success) {
+        // Store token in localStorage
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        
         toast.success('Login successful!')
+        
         // Redirect based on role
-        if (data.user?.role === 'admin' || data.user?.role === 'superadmin') {
+        if (data.user?.role === 'admin') {
           window.location.href = '/admin'
         } else {
           window.location.href = '/dashboard'
         }
       } else {
-        toast.error(data.error || 'Login failed')
+        toast.error(data.message || 'Login failed')
       }
     } catch (error) {
+      console.error('Login error:', error)
       toast.error('Network error. Please try again.')
     } finally {
       setLoading(false)

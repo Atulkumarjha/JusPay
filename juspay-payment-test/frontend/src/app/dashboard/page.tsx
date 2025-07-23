@@ -44,6 +44,27 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Check authentication - only run on client side
+    if (typeof window === 'undefined') return
+    
+    const token = localStorage.getItem('token')
+    const userData = localStorage.getItem('user')
+    
+    if (!token || !userData) {
+      window.location.href = '/login'
+      return
+    }
+    
+    const parsedUser = JSON.parse(userData)
+    setUser({
+      id: parsedUser.id,
+      username: parsedUser.username,
+      wallet_balance: 25000,
+      glo_coin_balance: 50000,
+      total_withdrawn: 5000,
+      role: parsedUser.role
+    })
+    
     loadUserData()
     loadTransactions()
   }, [])
@@ -55,7 +76,7 @@ export default function UserDashboard() {
       if (data.success) {
         setUser(data.user)
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to load user data')
     }
   }
@@ -67,20 +88,19 @@ export default function UserDashboard() {
       if (data.success) {
         setTransactions(data.transactions)
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to load transactions')
     } finally {
       setLoading(false)
     }
   }
 
-  const logout = async () => {
-    try {
-      await fetch('/logout', { method: 'POST' })
-      window.location.href = '/login'
-    } catch (error) {
-      window.location.href = '/login'
-    }
+  const logout = () => {
+    if (typeof window === 'undefined') return
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    toast.success('Logged out successfully')
+    window.location.href = '/login'
   }
 
   const initiatePayment = async (amount: number) => {
@@ -95,11 +115,13 @@ export default function UserDashboard() {
       
       if (data.success) {
         // Redirect to payment page or handle payment flow
-        window.location.href = data.payment_url || `/payment/${data.order_id}`
+        if (typeof window !== 'undefined') {
+          window.location.href = data.payment_url || `/payment/${data.order_id}`
+        }
       } else {
         toast.error(data.error || 'Failed to create payment')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to initiate payment')
     }
   }
