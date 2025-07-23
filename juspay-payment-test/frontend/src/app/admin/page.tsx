@@ -161,10 +161,10 @@ export default function AdminDashboard() {
           <motion.div
             key={i}
             className="absolute w-2 h-2 bg-white rounded-full"
-            initial={{ x: Math.random() * window.innerWidth, y: window.innerHeight + 50 }}
+            initial={{ x: Math.random() * 1200, y: 800 }}
             animate={{ 
               y: -50,
-              x: Math.random() * window.innerWidth,
+              x: Math.random() * 1200,
               rotate: 360
             }}
             transition={{
